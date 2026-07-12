@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
   radiusMiles: "pricepermile_radiusMiles",
   milesPerGallon: "pricepermile_milesPerGallon",
   fillUpLitres: "pricepermile_fillUpLitres",
+  selectedStationId: "pricepermile_selectedStationId",
 };
 
 type StationWithCosts = PetrolStation & {
@@ -90,6 +91,12 @@ export default function Home() {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isLoadingStations, setIsLoadingStations] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return localStorage.getItem(STORAGE_KEYS.selectedStationId);
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -131,6 +138,15 @@ export default function Home() {
     localStorage.setItem(STORAGE_KEYS.milesPerGallon, String(milesPerGallon));
     localStorage.setItem(STORAGE_KEYS.fillUpLitres, String(fillUpLitres));
   }, [selectedFuel, radiusMiles, milesPerGallon, fillUpLitres]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (selectedStationId) {
+      localStorage.setItem(STORAGE_KEYS.selectedStationId, selectedStationId);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.selectedStationId);
+    }
+  }, [selectedStationId]);
 
   const nearbyStations = useMemo(() => {
     if (!userLocation || stations.length === 0) return [];
@@ -206,6 +222,24 @@ export default function Home() {
     if (best === undefined || station.totalCost < best) return station.totalCost;
     return best;
   }, undefined);
+
+  const selectedStation = selectedStationId
+    ? nearbyStations.find((station) => station.id === selectedStationId)
+    : undefined;
+
+  // When selectedStation becomes undefined (station not in filtered results),
+  // the UI will treat it as unselected, and referenceStationCost will fall back to bestTotalCost
+
+  const referenceStationCost = selectedStation?.totalCost ?? bestTotalCost;
+
+  const getSavingsLabel = (savingsPence: number, isSelected: boolean, isNegligibleDifference: boolean): string => {
+    if (isNegligibleDifference) {
+      return isSelected ? "Reference" : "Cheapest";
+    }
+    const savingsPounds = (Math.abs(savingsPence) / 100).toFixed(2);
+    const direction = savingsPence > 0 ? "more" : "less";
+    return `£${savingsPounds} ${direction}`;
+  };
 
   return (
     <>
@@ -301,13 +335,36 @@ export default function Home() {
                   <tbody>
                     {pagedStations.map((station) => {
                       const savings =
-                        bestTotalCost !== undefined && station.totalCost !== undefined
-                          ? station.totalCost - bestTotalCost
+                        referenceStationCost !== undefined && station.totalCost !== undefined
+                          ? station.totalCost - referenceStationCost
                           : 0;
+                      const isNegligibleDifference = Math.abs(savings) < 1; // Less than 1 pence difference
+                      const isSelected = selectedStationId === station.id;
+                      const handleRowClick = () => {
+                        if (isSelected) {
+                          setSelectedStationId(null);
+                        } else {
+                          setSelectedStationId(station.id);
+                        }
+                      };
+                      const handleKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleRowClick();
+                        }
+                      };
                       return (
                         <tr
                           key={station.id}
-                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                          onClick={handleRowClick}
+                          onKeyDown={handleKeyDown}
+                          tabIndex={0}
+                          aria-selected={isSelected}
+                          className={`border-b border-slate-100 transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-blue-50 hover:bg-blue-100"
+                              : "hover:bg-slate-50"
+                          }`}
                         >
                           <td className="py-3 px-4">
                             <div className="font-medium">{station.name}</div>
@@ -318,14 +375,12 @@ export default function Home() {
                           <td className="py-3 px-4">{station.price?.toFixed(1)}p</td>
                           <td
                             className={`py-3 px-4 ${
-                              savings === 0
+                              isNegligibleDifference
                                 ? "text-green-600"
                                 : "text-slate-700"
                             }`}
                           >
-                            {savings === 0
-                              ? "Cheapest"
-                              : `£${(savings / 100).toFixed(2)} more`}
+                            {getSavingsLabel(savings, isSelected, isNegligibleDifference)}
                           </td>
                           <td className="py-3 px-4">
                             {station.costOfFillUp !== undefined
