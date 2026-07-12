@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
   radiusMiles: "pricepermile_radiusMiles",
   milesPerGallon: "pricepermile_milesPerGallon",
   fillUpLitres: "pricepermile_fillUpLitres",
+  selectedStationId: "pricepermile_selectedStationId",
 };
 
 type StationWithCosts = PetrolStation & {
@@ -90,6 +91,12 @@ export default function Home() {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isLoadingStations, setIsLoadingStations] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return localStorage.getItem(STORAGE_KEYS.selectedStationId);
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -131,6 +138,15 @@ export default function Home() {
     localStorage.setItem(STORAGE_KEYS.milesPerGallon, String(milesPerGallon));
     localStorage.setItem(STORAGE_KEYS.fillUpLitres, String(fillUpLitres));
   }, [selectedFuel, radiusMiles, milesPerGallon, fillUpLitres]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (selectedStationId) {
+      localStorage.setItem(STORAGE_KEYS.selectedStationId, selectedStationId);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.selectedStationId);
+    }
+  }, [selectedStationId]);
 
   const nearbyStations = useMemo(() => {
     if (!userLocation || stations.length === 0) return [];
@@ -206,6 +222,12 @@ export default function Home() {
     if (best === undefined || station.totalCost < best) return station.totalCost;
     return best;
   }, undefined);
+
+  const selectedStation = selectedStationId
+    ? nearbyStations.find((station) => station.id === selectedStationId)
+    : undefined;
+
+  const referenceStationCost = selectedStation?.totalCost ?? bestTotalCost;
 
   return (
     <>
@@ -301,13 +323,25 @@ export default function Home() {
                   <tbody>
                     {pagedStations.map((station) => {
                       const savings =
-                        bestTotalCost !== undefined && station.totalCost !== undefined
-                          ? station.totalCost - bestTotalCost
+                        referenceStationCost !== undefined && station.totalCost !== undefined
+                          ? station.totalCost - referenceStationCost
                           : 0;
+                      const isSelected = selectedStationId === station.id;
                       return (
                         <tr
                           key={station.id}
-                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedStationId(null);
+                            } else {
+                              setSelectedStationId(station.id);
+                            }
+                          }}
+                          className={`border-b border-slate-100 transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-blue-50 hover:bg-blue-100"
+                              : "hover:bg-slate-50"
+                          }`}
                         >
                           <td className="py-3 px-4">
                             <div className="font-medium">{station.name}</div>
@@ -324,8 +358,10 @@ export default function Home() {
                             }`}
                           >
                             {savings === 0
-                              ? "Cheapest"
-                              : `£${(savings / 100).toFixed(2)} more`}
+                              ? isSelected
+                                ? "Reference"
+                                : "Cheapest"
+                              : `£${(savings / 100).toFixed(2)} ${savings > 0 ? "more" : "less"}`}
                           </td>
                           <td className="py-3 px-4">
                             {station.costOfFillUp !== undefined
