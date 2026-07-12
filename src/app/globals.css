@@ -72,6 +72,15 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+input[type="range"] {
+  accent-color: var(--accent-600);
+}
+
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;

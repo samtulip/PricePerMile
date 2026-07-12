@@ -170,6 +170,7 @@ export default function Home() {
             <div className="flex gap-3">
               {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
                 <button
+                  type="button"
                   key={fuel}
                   onClick={() => setSelectedFuel(fuel)}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -185,6 +186,7 @@ export default function Home() {
 
             <div className="flex gap-3 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
               <button
+                type="button"
                 onClick={() => setViewMode("table")}
                 className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
                   viewMode === "table"
@@ -196,6 +198,7 @@ export default function Home() {
                 <span className="hidden sm:inline">Table</span>
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode("map")}
                 className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
                   viewMode === "map"
@@ -333,6 +336,7 @@ export default function Home() {
               <div className="flex gap-3">
                 {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
                   <button
+                    type="button"
                     key={fuel}
                     onClick={() => setSelectedFuel(fuel)}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
