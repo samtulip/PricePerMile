@@ -3,6 +3,48 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent-600: #2563eb;
+  --accent-500: #3b82f6;
+  --accent-200: #bfdbfe;
+  --accent-on: #ffffff;
+  --brand-start: #2563eb;
+  --brand-end: #16a34a;
+}
+
+html.theme-blue {
+  --accent-600: #2563eb;
+  --accent-500: #3b82f6;
+  --accent-200: #bfdbfe;
+  --accent-on: #ffffff;
+  --brand-start: #2563eb;
+  --brand-end: #0891b2;
+}
+
+html.theme-green {
+  --accent-600: #16a34a;
+  --accent-500: #22c55e;
+  --accent-200: #bbf7d0;
+  --accent-on: #ffffff;
+  --brand-start: #16a34a;
+  --brand-end: #0d9488;
+}
+
+html.theme-purple {
+  --accent-600: #9333ea;
+  --accent-500: #a855f7;
+  --accent-200: #e9d5ff;
+  --accent-on: #ffffff;
+  --brand-start: #9333ea;
+  --brand-end: #ec4899;
+}
+
+html.theme-high-contrast {
+  --accent-600: #000000;
+  --accent-500: #1f2937;
+  --accent-200: #fef08a;
+  --accent-on: #ffffff;
+  --brand-start: #facc15;
+  --brand-end: #f97316;
 }
 
 html.dark {
@@ -37,7 +79,7 @@ html {
 
 /* Focus styles for accessibility */
 :focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--accent-500);
   outline-offset: 2px;
 }
 

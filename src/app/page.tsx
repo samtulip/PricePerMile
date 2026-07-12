@@ -174,7 +174,7 @@ export default function Home() {
                   onClick={() => setSelectedFuel(fuel)}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     selectedFuel === fuel
-                      ? "bg-blue-600 dark:bg-blue-500 text-white"
+                      ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700"
                   }`}
                 >
@@ -337,7 +337,7 @@ export default function Home() {
                     onClick={() => setSelectedFuel(fuel)}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
                       selectedFuel === fuel
-                        ? "bg-blue-600 dark:bg-blue-500 text-white"
+                        ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
