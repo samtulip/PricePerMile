@@ -3,7 +3,7 @@ export type FuelType = "petrol" | "diesel";
 export interface FuelPrice {
   type: FuelType;
   price: number; // Price in pence
-  lastUpdated: Date;
+  lastUpdated: string | Date;
 }
 
 export interface PetrolStation {
