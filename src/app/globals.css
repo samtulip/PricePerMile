@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 :root {
   --background: #ffffff;
@@ -122,4 +123,25 @@ html {
 /* Remove focus outline for mouse users */
 :focus:not(:focus-visible) {
   outline: none;
+}
+
+.ppm-price-marker {
+  background: transparent;
+  border: 0;
+}
+
+.ppm-price-marker span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  height: 32px;
+  border-radius: 9999px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent-600), var(--brand-end));
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.75);
 }

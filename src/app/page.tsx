@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation } from "@/types";
@@ -11,11 +12,30 @@ const DEFAULT_RADIUS = 7;
 const DEFAULT_MPG = 45;
 const DEFAULT_FILL_UP_LITRES = 40;
 const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
+const StationsMap = dynamic(() => import("@/components/StationsMap"), {
+  ssr: false,
+});
 const STORAGE_KEYS = {
   fuelType: "pricepermile_fuelType",
   radiusMiles: "pricepermile_radiusMiles",
   milesPerGallon: "pricepermile_milesPerGallon",
   fillUpLitres: "pricepermile_fillUpLitres",
+};
+
+type StationWithCosts = PetrolStation & {
+  distance: number;
+  price: number;
+  costToTravel: number | undefined;
+  costOfFillUp: number | undefined;
+  totalCost: number | undefined;
+};
+
+type RankedStation = PetrolStation & {
+  distance: number;
+  price: number;
+  costToTravel: number;
+  costOfFillUp: number;
+  totalCost: number;
 };
 
 export default function Home() {
@@ -141,19 +161,35 @@ export default function Home() {
             ? station.costToTravel + station.costOfFillUp
             : undefined,
       }))
-      .filter((station) => station.price !== undefined && station.distance !== undefined)
-      .filter((station) => station.distance! <= radiusMiles)
+      .filter(
+        (station): station is StationWithCosts =>
+          station.price !== undefined && station.distance !== undefined
+      )
+      .filter((station) => station.distance <= radiusMiles)
       .sort((a, b) => {
         if (a.totalCost !== undefined && b.totalCost !== undefined) {
-          if (a.totalCost === b.totalCost) return a.distance! - b.distance!;
+          if (a.totalCost === b.totalCost) return a.distance - b.distance;
           return a.totalCost - b.totalCost;
         }
         if (a.totalCost !== undefined) return -1;
         if (b.totalCost !== undefined) return 1;
-        if (a.price === b.price) return a.distance! - b.distance!;
-        return a.price! - b.price!;
+        if (a.price === b.price) return a.distance - b.distance;
+        return a.price - b.price;
       });
   }, [stations, selectedFuel, userLocation, radiusMiles, milesPerGallon, fillUpLitres]);
+
+  const topStationsForMap = useMemo(
+    () =>
+      nearbyStations
+        .filter(
+          (station): station is RankedStation =>
+            station.totalCost !== undefined &&
+            station.costOfFillUp !== undefined &&
+            station.costToTravel !== undefined
+        )
+        .slice(0, 5),
+    [nearbyStations]
+  );
 
   const bestTotalCost = nearbyStations.reduce<number | undefined>((best, station) => {
     if (station.totalCost === undefined) return best;
@@ -298,14 +334,30 @@ export default function Home() {
           ) : (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">Fuel Prices Map</h2>
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video">
-                <div className="text-center">
-                  <MapIcon className="w-12 h-12 mx-auto mb-2 text-slate-400 dark:text-slate-600" />
+              {isLoadingLocation || isLoadingStations ? (
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video">
+                  <p className="text-slate-500 dark:text-slate-400">Loading map data...</p>
+                </div>
+              ) : error ? (
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video px-6 text-center">
+                  <p className="text-slate-500 dark:text-slate-400">{error}</p>
+                </div>
+              ) : topStationsForMap.length === 0 ? (
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video px-6 text-center">
                   <p className="text-slate-500 dark:text-slate-400">
-                    Map integration coming soon. Station coordinates are loaded from JSON and ready for mapping.
+                    No stations with full cost data were found within {radiusMiles} miles.
                   </p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800">
+                    <StationsMap stations={topStationsForMap} userLocation={userLocation} />
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    Showing top {topStationsForMap.length} stations ranked by total cost (fill-up + travel).
+                  </p>
+                </>
+              )}
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
                 Your selected fuel type, radius, MPG, and fill-up amount are saved to local storage.
               </p>
