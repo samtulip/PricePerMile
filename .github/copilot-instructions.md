@@ -33,3 +33,6 @@ A mobile-first static site for comparing UK fuel (petrol and diesel) prices at p
 
 ## GitHub Actions
 All deployments are automated via GitHub Actions. Environment variables and secrets are stored safely in GitHub repository settings.
+
+## Contributing
+- Always lint the code and fix issues before completing.

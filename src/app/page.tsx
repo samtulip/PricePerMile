@@ -15,8 +15,27 @@ const STORAGE_KEYS = {
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
-  const [selectedFuel, setSelectedFuel] = useState<FuelType>(DEFAULT_FUEL);
-  const [radiusMiles, setRadiusMiles] = useState<number>(DEFAULT_RADIUS);
+  const [selectedFuel, setSelectedFuel] = useState<FuelType>(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_FUEL;
+    }
+
+    const storedFuel = sessionStorage.getItem(STORAGE_KEYS.fuelType);
+    return storedFuel === "petrol" || storedFuel === "diesel"
+      ? storedFuel
+      : DEFAULT_FUEL;
+  });
+  const [radiusMiles, setRadiusMiles] = useState<number>(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_RADIUS;
+    }
+
+    const storedRadius = sessionStorage.getItem(STORAGE_KEYS.radiusMiles);
+    const parsedRadius = storedRadius ? Number(storedRadius) : NaN;
+    return !Number.isNaN(parsedRadius) && parsedRadius > 0
+      ? parsedRadius
+      : DEFAULT_RADIUS;
+  });
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [stations, setStations] = useState<PetrolStation[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -25,18 +44,6 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    const storedFuel = sessionStorage.getItem(STORAGE_KEYS.fuelType);
-    const storedRadius = sessionStorage.getItem(STORAGE_KEYS.radiusMiles);
-
-    if (storedFuel === "petrol" || storedFuel === "diesel") {
-      setSelectedFuel(storedFuel);
-    }
-
-    const parsedRadius = storedRadius ? Number(storedRadius) : NaN;
-    if (!Number.isNaN(parsedRadius) && parsedRadius > 0) {
-      setRadiusMiles(parsedRadius);
-    }
 
     getUserLocation()
       .then((location) => {
