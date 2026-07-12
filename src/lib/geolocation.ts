@@ -44,10 +44,10 @@ export function calculateDistance(
 
 export function calculateCostToTravel(
   distance: number,
-  vehicleEconomy: number = 30 // Default MPG
+  vehicleEconomy: number = 30,
+  fuelPricePencePerLitre: number = 0
 ): number {
-  // Calculate cost in pence
-  // Assuming current fuel price is fetched separately
-  // This is just distance calculation
-  return Math.round((distance / vehicleEconomy) * 100); // 100 pence = £1 (placeholder)
+  // Convert miles + MPG to litres, then multiply by station price (pence per litre).
+  const litresUsed = (distance / vehicleEconomy) * 4.54609;
+  return Math.round(litresUsed * fuelPricePencePerLitre);
 }
