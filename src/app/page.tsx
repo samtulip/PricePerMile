@@ -144,6 +144,12 @@ export default function Home() {
       .filter((station) => station.price !== undefined && station.distance !== undefined)
       .filter((station) => station.distance! <= radiusMiles)
       .sort((a, b) => {
+        if (a.totalCost !== undefined && b.totalCost !== undefined) {
+          if (a.totalCost === b.totalCost) return a.distance! - b.distance!;
+          return a.totalCost - b.totalCost;
+        }
+        if (a.totalCost !== undefined) return -1;
+        if (b.totalCost !== undefined) return 1;
         if (a.price === b.price) return a.distance! - b.distance!;
         return a.price! - b.price!;
       });
@@ -259,13 +265,13 @@ export default function Home() {
                           <td className="py-3 px-4">{station.price?.toFixed(1)}p</td>
                           <td
                             className={`py-3 px-4 ${
-                              savings <= 0
+                              savings === 0
                                 ? "text-green-600 dark:text-green-400"
                                 : "text-slate-700 dark:text-slate-200"
                             }`}
                           >
-                            {savings <= 0
-                              ? `£${Math.abs(savings / 100).toFixed(2)} saved`
+                            {savings === 0
+                              ? "Cheapest"
                               : `£${(savings / 100).toFixed(2)} more`}
                           </td>
                           <td className="py-3 px-4">
