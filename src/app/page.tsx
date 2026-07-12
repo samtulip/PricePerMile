@@ -227,7 +227,19 @@ export default function Home() {
     ? nearbyStations.find((station) => station.id === selectedStationId)
     : undefined;
 
+  // When selectedStation becomes undefined (station not in filtered results),
+  // the UI will treat it as unselected, and referenceStationCost will fall back to bestTotalCost
+
   const referenceStationCost = selectedStation?.totalCost ?? bestTotalCost;
+
+  const getSavingsLabel = (savingsPence: number, isSelected: boolean, isNegligibleDifference: boolean): string => {
+    if (isNegligibleDifference) {
+      return isSelected ? "Reference" : "Cheapest";
+    }
+    const savingsPounds = (Math.abs(savingsPence) / 100).toFixed(2);
+    const direction = savingsPence > 0 ? "more" : "less";
+    return `£${savingsPounds} ${direction}`;
+  };
 
   return (
     <>
@@ -326,17 +338,28 @@ export default function Home() {
                         referenceStationCost !== undefined && station.totalCost !== undefined
                           ? station.totalCost - referenceStationCost
                           : 0;
+                      const isNegligibleDifference = Math.abs(savings) < 1; // Less than 1 pence difference
                       const isSelected = selectedStationId === station.id;
+                      const handleRowClick = () => {
+                        if (isSelected) {
+                          setSelectedStationId(null);
+                        } else {
+                          setSelectedStationId(station.id);
+                        }
+                      };
+                      const handleKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleRowClick();
+                        }
+                      };
                       return (
                         <tr
                           key={station.id}
-                          onClick={() => {
-                            if (isSelected) {
-                              setSelectedStationId(null);
-                            } else {
-                              setSelectedStationId(station.id);
-                            }
-                          }}
+                          onClick={handleRowClick}
+                          onKeyDown={handleKeyDown}
+                          tabIndex={0}
+                          aria-selected={isSelected}
                           className={`border-b border-slate-100 transition-colors cursor-pointer ${
                             isSelected
                               ? "bg-blue-50 hover:bg-blue-100"
@@ -352,16 +375,12 @@ export default function Home() {
                           <td className="py-3 px-4">{station.price?.toFixed(1)}p</td>
                           <td
                             className={`py-3 px-4 ${
-                              savings === 0
+                              isNegligibleDifference
                                 ? "text-green-600"
                                 : "text-slate-700"
                             }`}
                           >
-                            {savings === 0
-                              ? isSelected
-                                ? "Reference"
-                                : "Cheapest"
-                              : `£${(savings / 100).toFixed(2)} ${savings > 0 ? "more" : "less"}`}
+                            {getSavingsLabel(savings, isSelected, isNegligibleDifference)}
                           </td>
                           <td className="py-3 px-4">
                             {station.costOfFillUp !== undefined
