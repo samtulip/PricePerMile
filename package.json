@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "export": "npm run build"
+    "export": "npm run build",
+    "convert:stations": "node scripts/convert-stations-csv.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.24.0",

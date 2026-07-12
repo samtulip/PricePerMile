@@ -62,6 +62,7 @@ npm run dev
 - `npm run lint` - Run ESLint
 - `npm start` - Start the production server (local testing)
 - `npm run export` - Export static site to `./out`
+- `npm run convert:stations -- <input.csv> [output.json]` - Convert a flat forecourt CSV into station JSON (defaults to `public/data/stations.json`)
 
 ### Project Structure
 
