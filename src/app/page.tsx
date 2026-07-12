@@ -8,6 +8,7 @@ import { ListIcon, MapIcon } from "lucide-react";
 
 const DEFAULT_FUEL: FuelType = "petrol";
 const DEFAULT_RADIUS = 7;
+const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 const STORAGE_KEYS = {
   fuelType: "pricepermile_fuelType",
   radiusMiles: "pricepermile_radiusMiles",
@@ -61,7 +62,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetch("/data/stations.json")
+    fetch(`${BASE_PATH}/data/stations.json`)
       .then((response) => response.json())
       .then((data: PetrolStation[]) => {
         setStations(data);
