@@ -8,10 +8,12 @@ import { ListIcon, MapIcon } from "lucide-react";
 
 const DEFAULT_FUEL: FuelType = "petrol";
 const DEFAULT_RADIUS = 7;
+const DEFAULT_MPG = 45;
 const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 const STORAGE_KEYS = {
   fuelType: "pricepermile_fuelType",
   radiusMiles: "pricepermile_radiusMiles",
+  milesPerGallon: "pricepermile_milesPerGallon",
 };
 
 export default function Home() {
@@ -21,7 +23,7 @@ export default function Home() {
       return DEFAULT_FUEL;
     }
 
-    const storedFuel = sessionStorage.getItem(STORAGE_KEYS.fuelType);
+    const storedFuel = localStorage.getItem(STORAGE_KEYS.fuelType);
     return storedFuel === "petrol" || storedFuel === "diesel"
       ? storedFuel
       : DEFAULT_FUEL;
@@ -31,11 +33,22 @@ export default function Home() {
       return DEFAULT_RADIUS;
     }
 
-    const storedRadius = sessionStorage.getItem(STORAGE_KEYS.radiusMiles);
+    const storedRadius = localStorage.getItem(STORAGE_KEYS.radiusMiles);
     const parsedRadius = storedRadius ? Number(storedRadius) : NaN;
     return !Number.isNaN(parsedRadius) && parsedRadius > 0
       ? parsedRadius
       : DEFAULT_RADIUS;
+  });
+  const [milesPerGallon, setMilesPerGallon] = useState<number>(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_MPG;
+    }
+
+    const storedMpg = localStorage.getItem(STORAGE_KEYS.milesPerGallon);
+    const parsedMpg = storedMpg ? Number(storedMpg) : NaN;
+    return !Number.isNaN(parsedMpg) && parsedMpg > 0
+      ? parsedMpg
+      : DEFAULT_MPG;
   });
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [stations, setStations] = useState<PetrolStation[]>([]);
@@ -78,9 +91,10 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    sessionStorage.setItem(STORAGE_KEYS.fuelType, selectedFuel);
-    sessionStorage.setItem(STORAGE_KEYS.radiusMiles, String(radiusMiles));
-  }, [selectedFuel, radiusMiles]);
+    localStorage.setItem(STORAGE_KEYS.fuelType, selectedFuel);
+    localStorage.setItem(STORAGE_KEYS.radiusMiles, String(radiusMiles));
+    localStorage.setItem(STORAGE_KEYS.milesPerGallon, String(milesPerGallon));
+  }, [selectedFuel, radiusMiles, milesPerGallon]);
 
   const nearbyStations = useMemo(() => {
     if (!userLocation || stations.length === 0) return [];
@@ -100,7 +114,9 @@ export default function Home() {
           ...station,
           distance,
           price: fuelPrice?.price,
-          costToTravel: fuelPrice ? calculateCostToTravel(distance) : undefined,
+          costToTravel: fuelPrice
+            ? calculateCostToTravel(distance, milesPerGallon)
+            : undefined,
         };
       })
       .filter((station) => station.price !== undefined && station.distance !== undefined)
@@ -109,7 +125,7 @@ export default function Home() {
         if (a.price === b.price) return a.distance! - b.distance!;
         return a.price! - b.price!;
       });
-  }, [stations, selectedFuel, userLocation, radiusMiles]);
+  }, [stations, selectedFuel, userLocation, radiusMiles, milesPerGallon]);
 
   const bestPrice = nearbyStations[0]?.price;
 
@@ -191,9 +207,9 @@ export default function Home() {
                     <tr className="border-b border-slate-200 dark:border-slate-800">
                       <th className="text-left py-3 px-4 font-semibold">Station</th>
                       <th className="text-left py-3 px-4 font-semibold">Price (p/L)</th>
-                      <th className="text-left py-3 px-4 font-semibold">Distance</th>
-                      <th className="text-left py-3 px-4 font-semibold">Travel Cost</th>
                       <th className="text-left py-3 px-4 font-semibold">Savings</th>
+                      <th className="text-left py-3 px-4 font-semibold">Travel Cost</th>
+                      <th className="text-left py-3 px-4 font-semibold">Distance</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -211,12 +227,6 @@ export default function Home() {
                             </div>
                           </td>
                           <td className="py-3 px-4">{station.price?.toFixed(1)}p</td>
-                          <td className="py-3 px-4">{station.distance?.toFixed(1)} mi</td>
-                          <td className="py-3 px-4">
-                            {station.costToTravel !== undefined
-                              ? `£${(station.costToTravel / 100).toFixed(2)}`
-                              : "—"}
-                          </td>
                           <td
                             className={`py-3 px-4 ${
                               savings <= 0
@@ -228,6 +238,12 @@ export default function Home() {
                               ? `£${Math.abs(savings / 100).toFixed(2)} saved`
                               : `£${(savings / 100).toFixed(2)} more`}
                           </td>
+                          <td className="py-3 px-4">
+                            {station.costToTravel !== undefined
+                              ? `£${(station.costToTravel / 100).toFixed(2)}`
+                              : "—"}
+                          </td>
+                          <td className="py-3 px-4">{station.distance?.toFixed(1)} mi</td>
                         </tr>
                       );
                     })}
@@ -247,7 +263,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
-                Your selected radius and fuel type are saved in this session.
+                Your selected fuel type, radius, and MPG are saved to local storage.
               </p>
             </div>
           )}
@@ -255,7 +271,7 @@ export default function Home() {
 
         <div className="mt-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
           <h2 className="text-lg font-semibold mb-4">Search Settings</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium mb-2">Search radius (miles)</label>
               <input
@@ -287,6 +303,34 @@ export default function Home() {
                     {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Miles per gallon</label>
+              <input
+                type="range"
+                min={10}
+                max={80}
+                step={1}
+                value={milesPerGallon}
+                onChange={(event) => setMilesPerGallon(Number(event.target.value))}
+                className="w-full"
+              />
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={milesPerGallon}
+                onChange={(event) => {
+                  const parsedValue = Number(event.target.value);
+                  if (!Number.isNaN(parsedValue) && parsedValue > 0) {
+                    setMilesPerGallon(parsedValue);
+                  }
+                }}
+                className="mt-3 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-slate-100"
+              />
+              <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                {milesPerGallon} MPG. Default is {DEFAULT_MPG} MPG.
               </div>
             </div>
           </div>
