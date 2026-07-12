@@ -34,7 +34,7 @@ export function Header() {
                   event.target.value as "blue" | "green" | "purple" | "high-contrast"
                 )
               }
-              className="h-10 flex-1 sm:flex-none rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700"
+              className="h-10 flex-1 sm:flex-none rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 appearance-none"
               aria-label="Select color theme"
             >
               <option value="blue">Blue</option>

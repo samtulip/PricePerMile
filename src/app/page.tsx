@@ -11,6 +11,7 @@ const DEFAULT_FUEL: FuelType = "petrol";
 const DEFAULT_RADIUS = 7;
 const DEFAULT_MPG = 45;
 const DEFAULT_FILL_UP_LITRES = 40;
+const TABLE_PAGE_SIZE = 10;
 const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 const StationsMap = dynamic(() => import("@/components/StationsMap"), {
   ssr: false,
@@ -88,6 +89,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isLoadingStations, setIsLoadingStations] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -191,6 +193,14 @@ export default function Home() {
     [nearbyStations]
   );
 
+  const totalPages = Math.max(1, Math.ceil(nearbyStations.length / TABLE_PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  const pagedStations = useMemo(() => {
+    const start = (safeCurrentPage - 1) * TABLE_PAGE_SIZE;
+    return nearbyStations.slice(start, start + TABLE_PAGE_SIZE);
+  }, [nearbyStations, safeCurrentPage]);
+
   const bestTotalCost = nearbyStations.reduce<number | undefined>((best, station) => {
     if (station.totalCost === undefined) return best;
     if (best === undefined || station.totalCost < best) return station.totalCost;
@@ -212,7 +222,7 @@ export default function Home() {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     selectedFuel === fuel
                       ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      : "bg-slate-100 text-slate-900 hover:bg-slate-200"
                   }`}
                 >
                   {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
@@ -220,14 +230,14 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="flex gap-3 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+            <div className="flex gap-3 bg-slate-100 p-1 rounded-lg">
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
                 className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
                   viewMode === "table"
-                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-50 shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <ListIcon className="w-4 h-4" />
@@ -238,8 +248,8 @@ export default function Home() {
                 onClick={() => setViewMode("map")}
                 className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
                   viewMode === "map"
-                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-50 shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <MapIcon className="w-4 h-4" />
@@ -249,17 +259,17 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
           {viewMode === "table" ? (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">Fuel Prices by Station</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-sm text-slate-500 mt-1">
                     Showing stations within {radiusMiles} miles of your device location.
                   </p>
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-300">
+                <div className="text-sm text-slate-600">
                   {isLoadingLocation || isLoadingStations ? (
                     <span>Loading station data...</span>
                   ) : error ? (
@@ -267,15 +277,19 @@ export default function Home() {
                   ) : nearbyStations.length === 0 ? (
                     <span>No stations found within your radius.</span>
                   ) : (
-                    <span>{nearbyStations.length} stations found</span>
+                    <span>
+                      Showing {(safeCurrentPage - 1) * TABLE_PAGE_SIZE + 1}-
+                      {Math.min(safeCurrentPage * TABLE_PAGE_SIZE, nearbyStations.length)} of{" "}
+                      {nearbyStations.length} stations
+                    </span>
                   )}
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-800">
+                    <tr className="border-b border-slate-200 bg-slate-50">
                       <th className="text-left py-3 px-4 font-semibold">Station</th>
                       <th className="text-left py-3 px-4 font-semibold">Price (p/L)</th>
                       <th className="text-left py-3 px-4 font-semibold">Savings</th>
@@ -285,7 +299,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {nearbyStations.map((station) => {
+                    {pagedStations.map((station) => {
                       const savings =
                         bestTotalCost !== undefined && station.totalCost !== undefined
                           ? station.totalCost - bestTotalCost
@@ -293,11 +307,11 @@ export default function Home() {
                       return (
                         <tr
                           key={station.id}
-                          className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                          className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                         >
                           <td className="py-3 px-4">
                             <div className="font-medium">{station.name}</div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                            <div className="text-xs text-slate-500">
                               {station.address}
                             </div>
                           </td>
@@ -305,8 +319,8 @@ export default function Home() {
                           <td
                             className={`py-3 px-4 ${
                               savings === 0
-                                ? "text-green-600 dark:text-green-400"
-                                : "text-slate-700 dark:text-slate-200"
+                                ? "text-green-600"
+                                : "text-slate-700"
                             }`}
                           >
                             {savings === 0
@@ -330,42 +344,66 @@ export default function Home() {
                   </tbody>
                 </table>
               </div>
+
+              {nearbyStations.length > TABLE_PAGE_SIZE && (
+                <div className="flex items-center justify-between gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    disabled={safeCurrentPage === 1}
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <p className="text-sm text-slate-600">
+                    Page {safeCurrentPage} of {totalPages}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                    disabled={safeCurrentPage === totalPages}
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">Fuel Prices Map</h2>
               {isLoadingLocation || isLoadingStations ? (
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video">
-                  <p className="text-slate-500 dark:text-slate-400">Loading map data...</p>
+                <div className="w-full bg-slate-100 rounded-lg flex items-center justify-center aspect-video">
+                  <p className="text-slate-500">Loading map data...</p>
                 </div>
               ) : error ? (
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video px-6 text-center">
-                  <p className="text-slate-500 dark:text-slate-400">{error}</p>
+                <div className="w-full bg-slate-100 rounded-lg flex items-center justify-center aspect-video px-6 text-center">
+                  <p className="text-slate-500">{error}</p>
                 </div>
               ) : topStationsForMap.length === 0 ? (
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center aspect-video px-6 text-center">
-                  <p className="text-slate-500 dark:text-slate-400">
+                <div className="w-full bg-slate-100 rounded-lg flex items-center justify-center aspect-video px-6 text-center">
+                  <p className="text-slate-500">
                     No stations with full cost data were found within {radiusMiles} miles.
                   </p>
                 </div>
               ) : (
                 <>
-                  <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800">
+                  <div className="rounded-lg overflow-hidden border border-slate-200">
                     <StationsMap stations={topStationsForMap} userLocation={userLocation} />
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                  <p className="text-sm text-slate-600">
                     Showing top {topStationsForMap.length} stations ranked by total cost (fill-up + travel).
                   </p>
                 </>
               )}
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
+              <p className="text-xs text-slate-500 mt-4">
                 Your selected fuel type, radius, MPG, and fill-up amount are saved to local storage.
               </p>
             </div>
           )}
         </div>
 
-        <div className="mt-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <div className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
           <h2 className="text-lg font-semibold mb-4">Search Settings</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
@@ -379,7 +417,7 @@ export default function Home() {
                 onChange={(event) => setRadiusMiles(Number(event.target.value))}
                 className="w-full"
               />
-              <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              <div className="mt-2 text-sm text-slate-600">
                 {radiusMiles} miles
               </div>
             </div>
@@ -394,7 +432,7 @@ export default function Home() {
                     className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
                       selectedFuel === fuel
                         ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        : "bg-slate-100 text-slate-900 hover:bg-slate-200"
                     }`}
                   >
                     {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
@@ -424,9 +462,9 @@ export default function Home() {
                     setMilesPerGallon(parsedValue);
                   }
                 }}
-                className="mt-3 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-slate-100"
+                className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
               />
-              <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              <div className="mt-2 text-sm text-slate-600">
                 {milesPerGallon} MPG. Default is {DEFAULT_MPG} MPG.
               </div>
             </div>
@@ -452,9 +490,9 @@ export default function Home() {
                     setFillUpLitres(parsedValue);
                   }
                 }}
-                className="mt-3 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-slate-100"
+                className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
               />
-              <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              <div className="mt-2 text-sm text-slate-600">
                 {fillUpLitres} litres. Default is {DEFAULT_FILL_UP_LITRES} litres.
               </div>
             </div>
