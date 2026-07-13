@@ -458,7 +458,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="mpg-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</label>
+                  <label id="mpg-label" htmlFor="mpg-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</label>
                   <input
                     type="range"
                     min={10}
@@ -467,7 +467,7 @@ export default function Home() {
                     value={milesPerGallon}
                     onChange={(event) => setMilesPerGallon(Number(event.target.value))}
                     className="w-full"
-                    aria-label="Miles per gallon slider"
+                    aria-labelledby="mpg-label"
                   />
                   <input
                     id="mpg-input"
@@ -488,7 +488,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="fillup-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</label>
+                  <label id="fillup-label" htmlFor="fillup-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</label>
                   <input
                     type="range"
                     min={5}
@@ -497,7 +497,7 @@ export default function Home() {
                     value={fillUpLitres}
                     onChange={(event) => setFillUpLitres(Number(event.target.value))}
                     className="w-full"
-                    aria-label="Fill-up amount slider"
+                    aria-labelledby="fillup-label"
                   />
                   <input
                     id="fillup-input"
