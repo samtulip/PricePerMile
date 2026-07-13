@@ -458,7 +458,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="mpg-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</label>
+                  <span className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</span>
                   <input
                     type="range"
                     min={10}
@@ -470,7 +470,6 @@ export default function Home() {
                     aria-label="Miles per gallon slider"
                   />
                   <input
-                    id="mpg-input"
                     type="number"
                     min={1}
                     step={1}
@@ -489,7 +488,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="fillup-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</label>
+                  <span className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</span>
                   <input
                     type="range"
                     min={5}
@@ -501,7 +500,6 @@ export default function Home() {
                     aria-label="Fill-up amount slider"
                   />
                   <input
-                    id="fillup-input"
                     type="number"
                     min={1}
                     step={1}
@@ -520,7 +518,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 dark:text-slate-200">Search radius (miles)</label>
+                  <span className="block text-sm font-medium mb-2 dark:text-slate-200">Search radius (miles)</span>
                   <input
                     type="range"
                     min={1}
