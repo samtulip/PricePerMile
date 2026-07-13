@@ -83,12 +83,13 @@ src/
 
 ### Key Features Implementation
 
-#### Theme Support
+#### Color Theme Support
 
-The app uses a custom `ThemeProvider` that:
-- Supports multiple color themes (blue, green, purple, high-contrast)
-- Persists user choice to localStorage
-- Always displays in light mode regardless of device settings
+The app uses a custom `ThemeProvider` that manages color variants:
+- Supports multiple color schemes: blue (default), green, purple, and high-contrast
+- Persists user's color preference to localStorage
+- Always displays in light mode regardless of device theme settings
+- Uses CSS custom properties for easy theme switching
 
 #### Responsive Design
 
