@@ -458,7 +458,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label id="mpg-label" htmlFor="mpg-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</label>
+                  <label htmlFor="mpg-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</label>
                   <input
                     type="range"
                     min={10}
@@ -467,7 +467,7 @@ export default function Home() {
                     value={milesPerGallon}
                     onChange={(event) => setMilesPerGallon(Number(event.target.value))}
                     className="w-full"
-                    aria-labelledby="mpg-label"
+                    aria-label="Miles per gallon slider"
                   />
                   <input
                     id="mpg-input"
@@ -482,13 +482,14 @@ export default function Home() {
                       }
                     }}
                     className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                    aria-label="Miles per gallon number input"
                   />
                   <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {milesPerGallon} MPG. Default is {DEFAULT_MPG} MPG.
                   </div>
                 </div>
                 <div>
-                  <label id="fillup-label" htmlFor="fillup-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</label>
+                  <label htmlFor="fillup-input" className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</label>
                   <input
                     type="range"
                     min={5}
@@ -497,7 +498,7 @@ export default function Home() {
                     value={fillUpLitres}
                     onChange={(event) => setFillUpLitres(Number(event.target.value))}
                     className="w-full"
-                    aria-labelledby="fillup-label"
+                    aria-label="Fill-up amount slider"
                   />
                   <input
                     id="fillup-input"
@@ -512,6 +513,7 @@ export default function Home() {
                       }
                     }}
                     className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                    aria-label="Fill-up amount number input"
                   />
                   <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {fillUpLitres} litres. Default is {DEFAULT_FILL_UP_LITRES} litres.
@@ -527,6 +529,7 @@ export default function Home() {
                     value={radiusMiles}
                     onChange={(event) => setRadiusMiles(Number(event.target.value))}
                     className="w-full"
+                    aria-label="Search radius slider"
                   />
                   <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {radiusMiles} miles
