@@ -1,15 +1,18 @@
 "use client";
 
-import { useTheme } from "@/app/providers";
+import { ListIcon, MapIcon } from "lucide-react";
 
-export function Header() {
-  const { colorTheme, setColorTheme } = useTheme();
+interface HeaderProps {
+  viewMode: "table" | "map";
+  onViewModeChange: (mode: "table" | "map") => void;
+}
 
+export function Header({ viewMode, onViewModeChange }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white transition-colors">
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white transition-colors dark:bg-slate-900 dark:border-slate-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-          <div className="sm:flex-1 min-w-0">
+        <div className="py-3 flex justify-between items-center gap-3">
+          <div className="flex-1 min-w-0">
             <h1
               className="text-2xl font-bold text-transparent bg-clip-text"
               style={{
@@ -18,30 +21,37 @@ export function Header() {
             >
               PricePerMile
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Find the cheapest fuel near you
             </p>
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <label htmlFor="color-theme" className="sr-only">
-              Color theme
-            </label>
-            <select
-              id="color-theme"
-              value={colorTheme}
-              onChange={(event) =>
-                setColorTheme(
-                  event.target.value as "blue" | "green" | "purple" | "high-contrast"
-                )
-              }
-              className="h-10 flex-1 sm:flex-none rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 appearance-none"
-              aria-label="Select color theme"
+          <div className="flex gap-3 bg-slate-100 p-1 rounded-lg dark:bg-slate-800">
+            <button
+              type="button"
+              onClick={() => onViewModeChange("table")}
+              className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
+                viewMode === "table"
+                  ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+              }`}
+              aria-label="Table view"
             >
-              <option value="blue">Blue</option>
-              <option value="green">Green</option>
-              <option value="purple">Purple</option>
-              <option value="high-contrast">High Contrast</option>
-            </select>
+              <ListIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Table</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onViewModeChange("map")}
+              className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
+                viewMode === "map"
+                  ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+              }`}
+              aria-label="Map view"
+            >
+              <MapIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Map</span>
+            </button>
           </div>
         </div>
       </div>
