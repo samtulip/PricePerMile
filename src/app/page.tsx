@@ -417,22 +417,22 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setShowSettings(!showSettings)}
-            className="w-full flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-left font-medium transition-colors hover:bg-slate-50"
+            className="w-full flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-left font-medium transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-100"
             aria-expanded={showSettings}
           >
             <span>Settings</span>
             {showSettings ? (
-              <ChevronUpIcon className="w-5 h-5 text-slate-500" />
+              <ChevronUpIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             ) : (
-              <ChevronDownIcon className="w-5 h-5 text-slate-500" />
+              <ChevronDownIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             )}
           </button>
           
           {showSettings && (
-            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-6">
+            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-6 dark:bg-slate-900 dark:border-slate-700">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Fuel type</label>
+                  <label className="block text-sm font-medium mb-2 dark:text-slate-200">Fuel type</label>
                   <div className="flex gap-3">
                     {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
                       <button
@@ -442,7 +442,7 @@ export default function Home() {
                         className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
                           selectedFuel === fuel
                             ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                            : "bg-slate-100 text-slate-900 hover:bg-slate-200"
+                            : "bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                         }`}
                       >
                         {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
@@ -451,7 +451,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Miles per gallon</label>
+                  <label className="block text-sm font-medium mb-2 dark:text-slate-200">Miles per gallon</label>
                   <input
                     type="range"
                     min={10}
@@ -472,14 +472,14 @@ export default function Home() {
                         setMilesPerGallon(parsedValue);
                       }
                     }}
-                    className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                    className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                   />
-                  <div className="mt-2 text-sm text-slate-600">
+                  <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {milesPerGallon} MPG. Default is {DEFAULT_MPG} MPG.
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Fill-up amount (litres)</label>
+                  <label className="block text-sm font-medium mb-2 dark:text-slate-200">Fill-up amount (litres)</label>
                   <input
                     type="range"
                     min={5}
@@ -500,14 +500,14 @@ export default function Home() {
                         setFillUpLitres(parsedValue);
                       }
                     }}
-                    className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                    className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                   />
-                  <div className="mt-2 text-sm text-slate-600">
+                  <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {fillUpLitres} litres. Default is {DEFAULT_FILL_UP_LITRES} litres.
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Search radius (miles)</label>
+                  <label className="block text-sm font-medium mb-2 dark:text-slate-200">Search radius (miles)</label>
                   <input
                     type="range"
                     min={1}
@@ -517,13 +517,13 @@ export default function Home() {
                     onChange={(event) => setRadiusMiles(Number(event.target.value))}
                     className="w-full"
                   />
-                  <div className="mt-2 text-sm text-slate-600">
+                  <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {radiusMiles} miles
                   </div>
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-slate-200">
-                <label htmlFor="color-theme" className="block text-sm font-medium mb-2">
+              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <label htmlFor="color-theme" className="block text-sm font-medium mb-2 dark:text-slate-200">
                   Color theme
                 </label>
                 <select
@@ -534,7 +534,7 @@ export default function Home() {
                       event.target.value as "blue" | "green" | "purple" | "high-contrast"
                     )
                   }
-                  className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 appearance-none"
+                  className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 appearance-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                   aria-label="Select color theme"
                 >
                   <option value="blue">Blue</option>
