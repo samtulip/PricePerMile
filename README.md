@@ -8,7 +8,7 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 - 📍 **Geolocation**: Automatically detect your location to find nearby fuel stations
 - 💷 **Price Comparison**: Compare prices across petrol stations with real-time data
 - 📊 **Cost Calculations**: Calculate travel costs and potential savings
-- 🌓 **Dark Mode**: Light and dark theme support with persistent preferences
+- 🎨 **Color Themes**: Choose from multiple color themes (blue, green, purple, high-contrast)
 - 📱 **Mobile First**: Fully responsive design optimized for mobile devices
 - 🚀 **Zero Cost**: Hosted on GitHub Pages with Cloudflare integration
 - 🔒 **Secure**: No API keys or secrets in code; all sensitive data in GitHub Secrets
@@ -17,7 +17,7 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 
 - **Framework**: [Next.js 16](https://nextjs.org/) with App Router
 - **Language**: TypeScript
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with dark mode support
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Hosting**: [GitHub Pages](https://pages.github.com/)
 - **CDN**: [Cloudflare](https://www.cloudflare.com/)
@@ -74,7 +74,7 @@ src/
 │   ├── globals.css   # Global styles
 │   └── providers.tsx # Theme provider component
 ├── components/       # Reusable components
-│   └── Header.tsx    # Header with theme toggle
+│   └── Header.tsx    # Header with view toggle
 ├── lib/              # Utility functions
 │   └── geolocation.ts # Geolocation and distance calculations
 └── types/            # TypeScript type definitions
@@ -86,10 +86,9 @@ src/
 #### Theme Support
 
 The app uses a custom `ThemeProvider` that:
-- Detects system preferences
+- Supports multiple color themes (blue, green, purple, high-contrast)
 - Persists user choice to localStorage
-- Supports light and dark themes
-- Uses Tailwind CSS dark mode class
+- Always displays in light mode regardless of device settings
 
 #### Responsive Design
 
