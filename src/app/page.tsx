@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
+import { useTheme } from "@/app/providers";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation } from "@/types";
-import { ListIcon, MapIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 const DEFAULT_FUEL: FuelType = "petrol";
 const DEFAULT_RADIUS = 7;
@@ -41,7 +42,9 @@ type RankedStation = PetrolStation & {
 };
 
 export default function Home() {
+  const { colorTheme, setColorTheme } = useTheme();
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
+  const [showSettings, setShowSettings] = useState(false);
   const [selectedFuel, setSelectedFuel] = useState<FuelType>(() => {
     if (typeof window === "undefined") {
       return DEFAULT_FUEL;
@@ -243,56 +246,8 @@ export default function Home() {
 
   return (
     <>
-      <Header />
+      <Header viewMode={viewMode} onViewModeChange={setViewMode} />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-            <div className="flex gap-3">
-              {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
-                <button
-                  type="button"
-                  key={fuel}
-                  onClick={() => setSelectedFuel(fuel)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedFuel === fuel
-                      ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                      : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                  }`}
-                >
-                  {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-3 bg-slate-100 p-1 rounded-lg">
-              <button
-                type="button"
-                onClick={() => setViewMode("table")}
-                className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
-                  viewMode === "table"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <ListIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Table</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("map")}
-                className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
-                  viewMode === "map"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <MapIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Map</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           {viewMode === "table" ? (
             <div className="space-y-4">
@@ -458,100 +413,138 @@ export default function Home() {
           )}
         </div>
 
-        <div className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="text-lg font-semibold mb-4">Search Settings</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Search radius (miles)</label>
-              <input
-                type="range"
-                min={1}
-                max={20}
-                step={1}
-                value={radiusMiles}
-                onChange={(event) => setRadiusMiles(Number(event.target.value))}
-                className="w-full"
-              />
-              <div className="mt-2 text-sm text-slate-600">
-                {radiusMiles} miles
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => setShowSettings(!showSettings)}
+            className="w-full flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-left font-medium transition-colors hover:bg-slate-50"
+            aria-expanded={showSettings}
+          >
+            <span>Settings</span>
+            {showSettings ? (
+              <ChevronUpIcon className="w-5 h-5 text-slate-500" />
+            ) : (
+              <ChevronDownIcon className="w-5 h-5 text-slate-500" />
+            )}
+          </button>
+          
+          {showSettings && (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Fuel type</label>
+                  <div className="flex gap-3">
+                    {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
+                      <button
+                        type="button"
+                        key={fuel}
+                        onClick={() => setSelectedFuel(fuel)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
+                          selectedFuel === fuel
+                            ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
+                            : "bg-slate-100 text-slate-900 hover:bg-slate-200"
+                        }`}
+                      >
+                        {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Miles per gallon</label>
+                  <input
+                    type="range"
+                    min={10}
+                    max={80}
+                    step={1}
+                    value={milesPerGallon}
+                    onChange={(event) => setMilesPerGallon(Number(event.target.value))}
+                    className="w-full"
+                  />
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={milesPerGallon}
+                    onChange={(event) => {
+                      const parsedValue = Number(event.target.value);
+                      if (!Number.isNaN(parsedValue) && parsedValue > 0) {
+                        setMilesPerGallon(parsedValue);
+                      }
+                    }}
+                    className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                  />
+                  <div className="mt-2 text-sm text-slate-600">
+                    {milesPerGallon} MPG. Default is {DEFAULT_MPG} MPG.
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Fill-up amount (litres)</label>
+                  <input
+                    type="range"
+                    min={5}
+                    max={100}
+                    step={1}
+                    value={fillUpLitres}
+                    onChange={(event) => setFillUpLitres(Number(event.target.value))}
+                    className="w-full"
+                  />
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={fillUpLitres}
+                    onChange={(event) => {
+                      const parsedValue = Number(event.target.value);
+                      if (!Number.isNaN(parsedValue) && parsedValue > 0) {
+                        setFillUpLitres(parsedValue);
+                      }
+                    }}
+                    className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                  />
+                  <div className="mt-2 text-sm text-slate-600">
+                    {fillUpLitres} litres. Default is {DEFAULT_FILL_UP_LITRES} litres.
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Search radius (miles)</label>
+                  <input
+                    type="range"
+                    min={1}
+                    max={20}
+                    step={1}
+                    value={radiusMiles}
+                    onChange={(event) => setRadiusMiles(Number(event.target.value))}
+                    className="w-full"
+                  />
+                  <div className="mt-2 text-sm text-slate-600">
+                    {radiusMiles} miles
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Fuel type</label>
-              <div className="flex gap-3">
-                {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
-                  <button
-                    type="button"
-                    key={fuel}
-                    onClick={() => setSelectedFuel(fuel)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
-                      selectedFuel === fuel
-                        ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                        : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                    }`}
-                  >
-                    {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Miles per gallon</label>
-              <input
-                type="range"
-                min={10}
-                max={80}
-                step={1}
-                value={milesPerGallon}
-                onChange={(event) => setMilesPerGallon(Number(event.target.value))}
-                className="w-full"
-              />
-              <input
-                type="number"
-                min={1}
-                step={1}
-                value={milesPerGallon}
-                onChange={(event) => {
-                  const parsedValue = Number(event.target.value);
-                  if (!Number.isNaN(parsedValue) && parsedValue > 0) {
-                    setMilesPerGallon(parsedValue);
+              <div className="mt-6 pt-6 border-t border-slate-200">
+                <label htmlFor="color-theme" className="block text-sm font-medium mb-2">
+                  Color theme
+                </label>
+                <select
+                  id="color-theme"
+                  value={colorTheme}
+                  onChange={(event) =>
+                    setColorTheme(
+                      event.target.value as "blue" | "green" | "purple" | "high-contrast"
+                    )
                   }
-                }}
-                className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
-              />
-              <div className="mt-2 text-sm text-slate-600">
-                {milesPerGallon} MPG. Default is {DEFAULT_MPG} MPG.
+                  className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 appearance-none"
+                  aria-label="Select color theme"
+                >
+                  <option value="blue">Blue</option>
+                  <option value="green">Green</option>
+                  <option value="purple">Purple</option>
+                  <option value="high-contrast">High Contrast</option>
+                </select>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Fill-up amount (litres)</label>
-              <input
-                type="range"
-                min={5}
-                max={100}
-                step={1}
-                value={fillUpLitres}
-                onChange={(event) => setFillUpLitres(Number(event.target.value))}
-                className="w-full"
-              />
-              <input
-                type="number"
-                min={1}
-                step={1}
-                value={fillUpLitres}
-                onChange={(event) => {
-                  const parsedValue = Number(event.target.value);
-                  if (!Number.isNaN(parsedValue) && parsedValue > 0) {
-                    setFillUpLitres(parsedValue);
-                  }
-                }}
-                className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
-              />
-              <div className="mt-2 text-sm text-slate-600">
-                {fillUpLitres} litres. Default is {DEFAULT_FILL_UP_LITRES} litres.
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </>
