@@ -30,3 +30,11 @@ export interface UserSettings {
   fuelTankCapacity?: number; // Gallons
   theme: "light" | "dark";
 }
+
+export type RankedStation = PetrolStation & {
+  distance: number;
+  price: number;
+  costToTravel: number;
+  costOfFillUp: number;
+  totalCost: number;
+};
