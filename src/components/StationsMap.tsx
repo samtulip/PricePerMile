@@ -9,27 +9,13 @@ import {
   useMap,
 } from "react-leaflet";
 import { divIcon, latLngBounds } from "leaflet";
-import type { UserLocation } from "@/types";
-
-type RankedStation = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  price: number;
-  costOfFillUp: number;
-  costToTravel: number;
-  totalCost: number;
-};
+import { formatPounds } from "@/utils/formatters";
+import type { UserLocation, RankedStation } from "@/types";
 
 type StationsMapProps = {
   stations: RankedStation[];
   userLocation: UserLocation | null;
 };
-
-function formatPounds(pence: number): string {
-  return `£${(pence / 100).toFixed(2)}`;
-}
 
 function createPriceIcon(totalCost: number) {
   return divIcon({
