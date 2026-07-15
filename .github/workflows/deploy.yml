@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "packages/frontend/**"
+      - ".github/workflows/deploy.yml"
+      - "package.json"
+      - "package-lock.json"
   pull_request:
     branches:
       - main
+    paths:
+      - "packages/frontend/**"
+      - ".github/workflows/deploy.yml"
+      - "package.json"
+      - "package-lock.json"
 
 permissions:
   contents: read
@@ -44,7 +54,7 @@ jobs:
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ./out
+          path: ./packages/frontend/out
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
