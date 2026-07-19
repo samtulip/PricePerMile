@@ -76,12 +76,12 @@ export function TableSection({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="text-left py-3 px-4 font-semibold">Station</th>
-              <th className="text-left py-3 px-4 font-semibold">Price (p/L)</th>
-              <th className="text-left py-3 px-4 font-semibold">Savings</th>
-              <th className="text-left py-3 px-4 font-semibold">Cost of Fill Up</th>
-              <th className="text-left py-3 px-4 font-semibold">Travel Cost</th>
-              <th className="text-left py-3 px-4 font-semibold">Distance</th>
+              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">Station</th>
+              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">Price (p/L)</th>
+              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">Savings</th>
+              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">Cost of Fill Up</th>
+              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">Travel Cost</th>
+              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">Distance</th>
             </tr>
           </thead>
           <tbody>

@@ -191,8 +191,8 @@ export default function Home() {
   return (
     <>
       <Header viewMode={viewMode} onViewModeChange={setViewMode} />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 lg:p-6">
           {viewMode === "table" ? (
             <TableSection
               stations={nearbyStations}
