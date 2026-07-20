@@ -7,7 +7,7 @@ const DEFAULT_KV_KEY = "stations.json";
 
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   try {
-    const key = env.STATIONS_KV_KEY || DEFAULT_KV_KEY;
+    const key = env.STATIONS_KV_KEY?.trim() || DEFAULT_KV_KEY;
     const raw = await env.STATIONS_KV.get(key);
 
     if (!raw) {
@@ -23,7 +23,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
         "Cache-Control": "public, max-age=60, s-maxage=300",
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("Failed to read station data from Cloudflare KV:", error);
     return new Response(JSON.stringify({ error: "Unable to load station data from Cloudflare KV." }), {
       status: 500,
       headers: { "Content-Type": "application/json; charset=utf-8" },
