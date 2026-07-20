@@ -10,7 +10,7 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 - 📊 **Cost Calculations**: Calculate travel costs and potential savings
 - 🎨 **Color Themes**: Choose from multiple color themes (blue, green, purple, high-contrast)
 - 📱 **Mobile First**: Fully responsive design optimized for mobile devices
-- 🚀 **Zero Cost**: Hosted on GitHub Pages with Cloudflare integration
+- 🚀 **Zero Cost**: Hosted on Cloudflare Pages with edge KV-backed station data
 - 🔒 **Secure**: No API keys or secrets in code; all sensitive data in GitHub Secrets
 
 ## Tech Stack
@@ -19,7 +19,7 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 - **Language**: TypeScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **Hosting**: [GitHub Pages](https://pages.github.com/)
+- **Hosting**: [Cloudflare Pages](https://pages.cloudflare.com/)
 - **CDN**: [Cloudflare](https://www.cloudflare.com/)
 - **CI/CD**: GitHub Actions
 
@@ -107,23 +107,26 @@ The app structure supports:
 
 ## Deployment
 
-### GitHub Pages Setup
+### Cloudflare Pages Setup
 
-1. Enable GitHub Pages in repository settings
-2. Set source to "GitHub Actions"
-3. The CI/CD pipeline will automatically deploy on push to `main`
+1. Create a Cloudflare Pages project.
+2. Add a KV binding named `STATIONS_KV` to the Pages project settings.
+3. Upload your station payload to KV under the key `stations.json` (or set `STATIONS_KV_KEY` project variable to a different key).
+4. Add the GitHub secrets listed below.
+5. The CI/CD pipeline deploys on push to `main`.
 
 ### Environment Variables
 
-The build process uses:
-- `NEXT_PUBLIC_BASE_PATH` - Set automatically by CI/CD for GitHub Pages compatibility
+Runtime environment values used by Cloudflare Pages Functions:
+- `STATIONS_KV` (KV binding) - Cloudflare KV namespace containing station JSON
+- `STATIONS_KV_KEY` (optional Pages variable) - KV key for the station payload, defaults to `stations.json`
 
-**No secrets or API keys are stored in code or required.**
+**No secrets or API keys are stored in code.**
 
 ### Cloudflare Setup
 
 1. Point your domain to Cloudflare nameservers
-2. Create a CNAME record pointing to `yourusername.github.io`
+2. Map your custom domain to the Cloudflare Pages project
 3. Enable caching rules as needed
 
 ## Architecture
@@ -133,7 +136,7 @@ The build process uses:
 Next.js is configured for static export:
 - All pages are pre-rendered at build time
 - No server-side rendering needed
-- Optimized for GitHub Pages hosting
+- Optimized for Cloudflare Pages hosting
 - Zero runtime costs
 
 ### No External APIs in Core
@@ -157,10 +160,12 @@ The app is designed to:
 
 ### GitHub Secrets
 
-Future integrations may require secrets:
-1. Go to Repository Settings → Secrets and Variables → Actions
-2. Add required secrets
-3. Reference in GitHub Actions workflow using `${{ secrets.SECRET_NAME }}`
+Required for deployment:
+1. `CLOUDFLARE_API_TOKEN` - Cloudflare API token with Pages deployment permissions
+2. `CLOUDFLARE_ACCOUNT_ID` - Cloudflare account identifier
+3. `CLOUDFLARE_PAGES_PROJECT_NAME` - Target Cloudflare Pages project name
+
+Add them in Repository Settings → Secrets and Variables → Actions and reference as `${{ secrets.SECRET_NAME }}`.
 
 ## Browser Support
 
@@ -199,7 +204,7 @@ Future integrations may require secrets:
 
 ### Hosting Costs: £0/month
 
-- **GitHub Pages**: Free static hosting
+- **Cloudflare Pages**: Free static hosting + edge functions
 - **Cloudflare**: Free tier includes caching and CDN
 - **Domain**: Only applicable domain registration costs
 
@@ -226,7 +231,7 @@ For issues, questions, or feature requests:
 - [Next.js](https://nextjs.org/) - React framework
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
 - [Lucide Icons](https://lucide.dev/) - Beautiful SVG icons
-- [GitHub Pages](https://pages.github.com/) - Free static hosting
+- [Cloudflare Pages](https://pages.cloudflare.com/) - Free static hosting and edge functions
 - [Cloudflare](https://www.cloudflare.com/) - CDN and caching
 
 ---

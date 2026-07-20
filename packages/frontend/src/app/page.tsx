@@ -16,6 +16,7 @@ const DEFAULT_MPG = 45;
 const DEFAULT_FILL_UP_LITRES = 40;
 const TABLE_PAGE_SIZE = 10;
 const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
+const STATIONS_ENDPOINT = `${BASE_PATH}/api/stations`;
 
 const STORAGE_KEYS = {
   fuelType: "pricepermile_fuelType",
@@ -93,8 +94,13 @@ export default function Home() {
 
   // Load station data
   useEffect(() => {
-    fetch(`${BASE_PATH}/data/stations.json`)
-      .then((response) => response.json())
+    fetch(STATIONS_ENDPOINT)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Station API request failed: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data: PetrolStation[]) => {
         setStations(data);
         setError(null);
