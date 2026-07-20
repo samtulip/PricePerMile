@@ -1,4 +1,4 @@
-name: Build and Deploy to GitHub Pages
+name: Build and Deploy Frontend
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "packages/frontend/**"
-      - ".github/workflows/deploy.yml"
+      - ".github/workflows/deploy-frontend.yml"
       - "package.json"
       - "package-lock.json"
   pull_request:
@@ -14,7 +14,7 @@ on:
       - main
     paths:
       - "packages/frontend/**"
-      - ".github/workflows/deploy.yml"
+      - ".github/workflows/deploy-frontend.yml"
       - "package.json"
       - "package-lock.json"
 
@@ -22,10 +22,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -50,13 +46,14 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_STATIONS_API_URL: ${{ secrets.NEXT_PUBLIC_STATIONS_API_URL }}
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./packages/frontend/out
 
-  deploy:
+  deploy-pages:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest

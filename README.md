@@ -10,7 +10,7 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 - 📊 **Cost Calculations**: Calculate travel costs and potential savings
 - 🎨 **Color Themes**: Choose from multiple color themes (blue, green, purple, high-contrast)
 - 📱 **Mobile First**: Fully responsive design optimized for mobile devices
-- 🚀 **Zero Cost**: Hosted on GitHub Pages with Cloudflare integration
+- 🚀 **Zero Cost**: Hosted on GitHub Pages with station data served by Cloudflare Worker + KV
 - 🔒 **Secure**: No API keys or secrets in code; all sensitive data in GitHub Secrets
 
 ## Tech Stack
@@ -107,23 +107,29 @@ The app structure supports:
 
 ## Deployment
 
-### GitHub Pages Setup
+### GitHub Pages + Cloudflare API Setup
 
-1. Enable GitHub Pages in repository settings
-2. Set source to "GitHub Actions"
-3. The CI/CD pipeline will automatically deploy on push to `main`
+1. Enable GitHub Pages in repository settings and set source to **GitHub Actions**.
+2. Create a Cloudflare KV namespace and upload station JSON under key `stations.json`.
+3. Create a Cloudflare Worker for station data and bind the KV namespace as `STATIONS_KV`.
+4. Set the Worker URL as `NEXT_PUBLIC_STATIONS_API_URL` in GitHub Secrets.
+5. Add the remaining GitHub secrets listed below.
+6. The CI/CD pipeline deploys both the static frontend (GitHub Pages) and station API worker (Cloudflare) on push to `main`.
 
 ### Environment Variables
 
-The build process uses:
-- `NEXT_PUBLIC_BASE_PATH` - Set automatically by CI/CD for GitHub Pages compatibility
+Build/runtime values used by the split architecture:
+- `NEXT_PUBLIC_BASE_PATH` (build env) - set automatically for GitHub Pages pathing
+- `NEXT_PUBLIC_STATIONS_API_URL` (build secret) - Cloudflare Worker endpoint used by the frontend
+- `STATIONS_KV` (Cloudflare Worker KV binding) - namespace containing station JSON
+- `STATIONS_KV_KEY` (Cloudflare Worker var, optional) - KV key for the payload, defaults to `stations.json`
 
-**No secrets or API keys are stored in code or required.**
+**No secrets or API keys are stored in code.**
 
 ### Cloudflare Setup
 
 1. Point your domain to Cloudflare nameservers
-2. Create a CNAME record pointing to `yourusername.github.io`
+2. Map your custom domain to GitHub Pages (or front it with Cloudflare)
 3. Enable caching rules as needed
 
 ## Architecture
@@ -133,7 +139,7 @@ The build process uses:
 Next.js is configured for static export:
 - All pages are pre-rendered at build time
 - No server-side rendering needed
-- Optimized for GitHub Pages hosting
+- Optimized for GitHub Pages static hosting
 - Zero runtime costs
 
 ### No External APIs in Core
@@ -151,16 +157,20 @@ The app is designed to:
 - ✅ All secrets managed via GitHub repository settings
 - ✅ No hardcoded API keys or credentials
 - ✅ Secure CI/CD pipeline with proper permissions
-- ✅ Static content delivery (no dynamic backend)
-- ✅ No server-side processing of sensitive data
-- ✅ Client-side data processing only
+- ✅ Static frontend delivery via GitHub Pages
+- ✅ Minimal backend via Cloudflare Worker only for station JSON retrieval
+- ✅ No server-side processing of sensitive user data
 
 ### GitHub Secrets
 
-Future integrations may require secrets:
-1. Go to Repository Settings → Secrets and Variables → Actions
-2. Add required secrets
-3. Reference in GitHub Actions workflow using `${{ secrets.SECRET_NAME }}`
+Required for deployment:
+1. `CLOUDFLARE_API_TOKEN` - Cloudflare API token with Workers deployment permissions
+2. `CLOUDFLARE_ACCOUNT_ID` - Cloudflare account identifier
+3. `CLOUDFLARE_STATIONS_WORKER_NAME` - Cloudflare Worker name for the station API
+4. `CLOUDFLARE_STATIONS_KV_NAMESPACE_ID` - KV namespace ID used for station data
+5. `NEXT_PUBLIC_STATIONS_API_URL` - Public URL of the Cloudflare station API (used at frontend build time)
+
+Add them in Repository Settings → Secrets and Variables → Actions and reference as `${{ secrets.SECRET_NAME }}`.
 
 ## Browser Support
 
