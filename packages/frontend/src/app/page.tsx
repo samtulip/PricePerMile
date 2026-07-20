@@ -15,8 +15,7 @@ const DEFAULT_RADIUS = 7;
 const DEFAULT_MPG = 45;
 const DEFAULT_FILL_UP_LITRES = 40;
 const TABLE_PAGE_SIZE = 10;
-const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
-const STATIONS_ENDPOINT = `${BASE_PATH}/api/stations`;
+const STATIONS_ENDPOINT = process.env.NEXT_PUBLIC_STATIONS_API_URL?.trim();
 
 const STORAGE_KEYS = {
   fuelType: "pricepermile_fuelType",
@@ -94,6 +93,12 @@ export default function Home() {
 
   // Load station data
   useEffect(() => {
+    if (!STATIONS_ENDPOINT) {
+      setError("Station API URL is not configured.");
+      setIsLoadingStations(false);
+      return;
+    }
+
     fetch(STATIONS_ENDPOINT)
       .then((response) => {
         if (!response.ok) {

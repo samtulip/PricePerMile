@@ -1,4 +1,4 @@
-name: Build and Deploy to Cloudflare Pages
+name: Build and Deploy
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "packages/frontend/**"
-      - "functions/**"
+      - "workers/**"
       - ".github/workflows/deploy.yml"
       - "package.json"
       - "package-lock.json"
@@ -15,16 +15,18 @@ on:
       - main
     paths:
       - "packages/frontend/**"
-      - "functions/**"
+      - "workers/**"
       - ".github/workflows/deploy.yml"
       - "package.json"
       - "package-lock.json"
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,11 +47,48 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: ""
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_STATIONS_API_URL: ${{ secrets.NEXT_PUBLIC_STATIONS_API_URL }}
 
-      - name: Deploy to Cloudflare Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: npx wrangler@4 pages deploy ./packages/frontend/out --project-name "${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }}" --functions ./functions
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./packages/frontend/out
+
+  deploy-pages:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  deploy-stations-api:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Deploy Cloudflare Worker for station data
+        run: |
+          cat <<EOF > /tmp/wrangler-stations-api.toml
+          name = "${{ secrets.CLOUDFLARE_STATIONS_WORKER_NAME }}"
+          main = "workers/stations-api/src/index.ts"
+          compatibility_date = "2026-07-20"
+          [vars]
+          STATIONS_KV_KEY = "stations.json"
+          [[kv_namespaces]]
+          binding = "STATIONS_KV"
+          id = "${{ secrets.CLOUDFLARE_STATIONS_KV_NAMESPACE_ID }}"
+          EOF
+
+          npx wrangler@4 deploy --config /tmp/wrangler-stations-api.toml
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
