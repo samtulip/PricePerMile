@@ -10,8 +10,8 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 - 📊 **Cost Calculations**: Calculate travel costs and potential savings
 - 🎨 **Color Themes**: Choose from multiple color themes (blue, green, purple, high-contrast)
 - 📱 **Mobile First**: Fully responsive design optimized for mobile devices
-- 🚀 **Zero Cost**: Hosted on GitHub Pages with station data served by Cloudflare Worker + KV
-- 🔒 **Secure**: No API keys or secrets in code; all sensitive data in GitHub Secrets
+- 🚀 **Zero Cost**: Hosted entirely on GitHub Pages with static station data
+- 🔒 **Secure**: No API keys or secrets in code; all data is static and publicly hosted
 
 ## Tech Stack
 
@@ -20,7 +20,6 @@ A mobile-first, zero-cost fuel price comparison tool for the UK. Compare petrol 
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Hosting**: [GitHub Pages](https://pages.github.com/)
-- **CDN**: [Cloudflare](https://www.cloudflare.com/)
 - **CI/CD**: GitHub Actions
 
 ## Getting Started
@@ -107,30 +106,18 @@ The app structure supports:
 
 ## Deployment
 
-### GitHub Pages + Cloudflare API Setup
+### GitHub Pages Setup
 
 1. Enable GitHub Pages in repository settings and set source to **GitHub Actions**.
-2. Create a Cloudflare KV namespace and upload station JSON under key `stations.json`.
-3. Create a Cloudflare Worker for station data and bind the KV namespace as `STATIONS_KV`.
-4. Set the Worker URL as `NEXT_PUBLIC_STATIONS_API_URL` in GitHub Secrets.
-5. Add the remaining GitHub secrets listed below.
-6. The CI/CD pipeline deploys both the static frontend (GitHub Pages) and station API worker (Cloudflare) on push to `main`.
+2. The CI/CD pipeline automatically builds the static frontend and deploys to GitHub Pages on push to `main`.
+3. Station data from `packages/frontend/public/data/stations.json` is included in the deployment.
 
 ### Environment Variables
 
-Build/runtime values used by the split architecture:
+Build-time values used:
 - `NEXT_PUBLIC_BASE_PATH` (build env) - set automatically for GitHub Pages pathing
-- `NEXT_PUBLIC_STATIONS_API_URL` (build secret) - Cloudflare Worker endpoint used by the frontend
-- `STATIONS_KV` (Cloudflare Worker KV binding) - namespace containing station JSON
-- `STATIONS_KV_KEY` (Cloudflare Worker var, optional) - KV key for the payload, defaults to `stations.json`
 
-**No secrets or API keys are stored in code.**
-
-### Cloudflare Setup
-
-1. Point your domain to Cloudflare nameservers
-2. Map your custom domain to GitHub Pages (or front it with Cloudflare)
-3. Enable caching rules as needed
+**No secrets or API keys are needed for deployment.**
 
 ## Architecture
 
@@ -142,10 +129,11 @@ Next.js is configured for static export:
 - Optimized for GitHub Pages static hosting
 - Zero runtime costs
 
-### No External APIs in Core
+### Minimal Backend via Static Files
 
 The app is designed to:
-- Work with locally stored data initially
+- Serve station data as a static JSON file
+- Work completely offline after initial load
 - Support future integration with free APIs
 - Never expose sensitive data
 - Cache data locally when possible
@@ -154,23 +142,12 @@ The app is designed to:
 
 ### Best Practices Implemented
 
-- ✅ All secrets managed via GitHub repository settings
+- ✅ All code is open source with no secrets needed
 - ✅ No hardcoded API keys or credentials
 - ✅ Secure CI/CD pipeline with proper permissions
 - ✅ Static frontend delivery via GitHub Pages
-- ✅ Minimal backend via Cloudflare Worker only for station JSON retrieval
-- ✅ No server-side processing of sensitive user data
-
-### GitHub Secrets
-
-Required for deployment:
-1. `CLOUDFLARE_API_TOKEN` - Cloudflare API token with Workers deployment permissions
-2. `CLOUDFLARE_ACCOUNT_ID` - Cloudflare account identifier
-3. `CLOUDFLARE_STATIONS_WORKER_NAME` - Cloudflare Worker name for the station API
-4. `CLOUDFLARE_STATIONS_KV_NAMESPACE_ID` - KV namespace ID used for station data
-5. `NEXT_PUBLIC_STATIONS_API_URL` - Public URL of the Cloudflare station API (used at frontend build time)
-
-Add them in Repository Settings → Secrets and Variables → Actions and reference as `${{ secrets.SECRET_NAME }}`.
+- ✅ Static station data served alongside frontend
+- ✅ No server-side processing needed
 
 ## Browser Support
 
@@ -210,7 +187,6 @@ Add them in Repository Settings → Secrets and Variables → Actions and refere
 ### Hosting Costs: £0/month
 
 - **GitHub Pages**: Free static hosting
-- **Cloudflare**: Free tier includes caching and CDN
 - **Domain**: Only applicable domain registration costs
 
 ### Traditional Alternatives: £50-200+/month
@@ -237,7 +213,6 @@ For issues, questions, or feature requests:
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
 - [Lucide Icons](https://lucide.dev/) - Beautiful SVG icons
 - [GitHub Pages](https://pages.github.com/) - Free static hosting
-- [Cloudflare](https://www.cloudflare.com/) - CDN and caching
 
 ---
 
