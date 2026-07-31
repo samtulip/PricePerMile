@@ -73,10 +73,12 @@ export function TableSection({
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm table-fixed sm:table-auto">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold">Station</th>
+              <th className="w-[38%] sm:w-auto text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold">
+                Station
+              </th>
               <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold">Price (p/L)</th>
               <th className="text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold">Savings</th>
               <th className="hidden sm:table-cell text-left py-2 px-2 sm:py-3 sm:px-4 font-semibold">
