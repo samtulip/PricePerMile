@@ -25,16 +25,16 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 cursor-pointer"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 cursor-pointer overflow-y-auto"
       onClick={handleOverlayClick}
       role="presentation"
       style={{ touchAction: "manipulation" }}
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-md w-full"
+        className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-md w-full max-h-full flex flex-col my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-start justify-between p-6 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">
             ⚠️ Important Notice
           </h2>
@@ -48,7 +48,7 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto">
           <p className="text-slate-700 dark:text-slate-300">
             <strong>Use this site at your own risk.</strong> PricePerMile is an experimental project created for exploring &quot;vibe coding&quot; approaches and alternative development patterns.
           </p>
@@ -62,7 +62,7 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
           </p>
         </div>
 
-        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-b-lg border-t border-slate-200 dark:border-slate-700">
+        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-b-lg border-t border-slate-200 dark:border-slate-700 shrink-0">
           <button
             type="button"
             onClick={handleButtonClick}
