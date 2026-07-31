@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { TableSection } from "@/components/TableSection";
 import { MapSection } from "@/components/MapSection";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { RiskWarningModal } from "@/components/RiskWarningModal";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation, RankedStation } from "@/types";
@@ -23,6 +24,7 @@ const STORAGE_KEYS = {
   milesPerGallon: "pricepermile_milesPerGallon",
   fillUpLitres: "pricepermile_fillUpLitres",
   selectedStationId: "pricepermile_selectedStationId",
+  riskWarningDismissed: "pricepermile_riskWarningDismissed",
 };
 
 type StationWithCosts = PetrolStation & {
@@ -59,10 +61,15 @@ export default function Home() {
     STORAGE_KEYS.selectedStationId,
     null
   );
+  const [riskWarningDismissed, setRiskWarningDismissed] = useLocalStorage<boolean>(
+    STORAGE_KEYS.riskWarningDismissed,
+    false
+  );
 
   // UI state
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
   const [showSettings, setShowSettings] = useState(false);
+  const [showRiskWarning, setShowRiskWarning] = useState(!riskWarningDismissed);
 
   // Data state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -190,6 +197,13 @@ export default function Home() {
 
   return (
     <>
+      <RiskWarningModal
+        isOpen={showRiskWarning}
+        onDismiss={() => {
+          setShowRiskWarning(false);
+          setRiskWarningDismissed(true);
+        }}
+      />
       <Header viewMode={viewMode} onViewModeChange={setViewMode} />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="rounded-lg border border-slate-200 bg-white p-6">
@@ -253,6 +267,10 @@ export default function Home() {
                 onRadiusChange={setRadiusMiles}
                 defaultMpg={DEFAULT_MPG}
                 defaultFillUp={DEFAULT_FILL_UP_LITRES}
+                onReopenWarning={() => {
+                  setShowRiskWarning(true);
+                  setRiskWarningDismissed(false);
+                }}
               />
             </div>
           )}

@@ -14,6 +14,7 @@ interface SettingsPanelProps {
   onRadiusChange: (radius: number) => void;
   defaultMpg: number;
   defaultFillUp: number;
+  onReopenWarning?: () => void;
 }
 
 const DEFAULT_MPG = 45;
@@ -30,6 +31,7 @@ export function SettingsPanel({
   onRadiusChange,
   defaultMpg = DEFAULT_MPG,
   defaultFillUp = DEFAULT_FILL_UP_LITRES,
+  onReopenWarning,
 }: SettingsPanelProps) {
   const { colorTheme, setColorTheme } = useTheme();
 
@@ -153,6 +155,17 @@ export function SettingsPanel({
           <option value="high-contrast">High Contrast</option>
         </select>
       </div>
+      {onReopenWarning && (
+        <div className="mt-6 pt-6 border-t border-slate-200">
+          <button
+            type="button"
+            onClick={onReopenWarning}
+            className="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 font-medium hover:bg-slate-50 transition-colors"
+          >
+            Reopen Warning
+          </button>
+        </div>
+      )}
     </div>
   );
 }
