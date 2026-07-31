@@ -16,8 +16,7 @@ const DEFAULT_RADIUS = 7;
 const DEFAULT_MPG = 45;
 const DEFAULT_FILL_UP_LITRES = 40;
 const TABLE_PAGE_SIZE = 10;
-const STATIONS_ENDPOINT = process.env.NEXT_PUBLIC_STATIONS_API_URL?.trim();
-const STATIONS_ENDPOINT_ERROR = "Station API URL is not configured.";
+const STATIONS_ENDPOINT = "/data/stations.json";
 
 const STORAGE_KEYS = {
   fuelType: "pricepermile_fuelType",
@@ -79,9 +78,9 @@ export default function Home() {
   // Data state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [stations, setStations] = useState<PetrolStation[]>([]);
-  const [error, setError] = useState<string | null>(STATIONS_ENDPOINT ? null : STATIONS_ENDPOINT_ERROR);
+  const [error, setError] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
-  const [isLoadingStations, setIsLoadingStations] = useState(Boolean(STATIONS_ENDPOINT));
+  const [isLoadingStations, setIsLoadingStations] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get user location
@@ -105,14 +104,10 @@ export default function Home() {
 
   // Load station data
   useEffect(() => {
-    if (!STATIONS_ENDPOINT) {
-      return;
-    }
-
     fetch(STATIONS_ENDPOINT)
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`Station API request failed: ${response.status}`);
+          throw new Error(`Station data request failed: ${response.status}`);
         }
         return response.json();
       })
