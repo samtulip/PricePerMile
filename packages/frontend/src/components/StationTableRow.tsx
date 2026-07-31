@@ -2,6 +2,7 @@
 
 import type { PetrolStation } from "@/types";
 import { formatPounds } from "@/utils/formatters";
+import { MapPin } from "lucide-react";
 
 interface StationTableRowProps {
   station: PetrolStation & {
@@ -48,6 +49,12 @@ export function StationTableRow({
     }
   };
 
+  const openWaze = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const wazeUrl = `https://waze.com/ul?ll=${station.latitude},${station.longitude}&navigate=yes`;
+    window.open(wazeUrl, "_blank");
+  };
+
   return (
     <tr
       onClick={onSelect}
@@ -58,25 +65,36 @@ export function StationTableRow({
         isSelected ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-50"
       }`}
     >
-      <td className="py-3 px-4">
-        <div className="font-medium">{station.name}</div>
-        <div className="text-xs text-slate-500">{station.address}</div>
+      <td className="py-2 px-2 sm:py-3 sm:px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="font-medium truncate">{station.name}</div>
+          </div>
+          <button
+            onClick={openWaze}
+            aria-label={`Open ${station.name} in Waze`}
+            className="flex-shrink-0 p-1 rounded-md text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            title="Open in Waze"
+          >
+            <MapPin size={18} />
+          </button>
+        </div>
       </td>
-      <td className="py-3 px-4">{station.price?.toFixed(1)}p</td>
+      <td className="py-2 px-2 sm:py-3 sm:px-4">{station.price?.toFixed(1)}p</td>
       <td
-        className={`py-3 px-4 ${
+        className={`py-2 px-2 sm:py-3 sm:px-4 ${
           isNegligibleDifference ? "text-green-600" : "text-slate-700"
         }`}
       >
         {getSavingsLabel(savings, isSelected, isNegligibleDifference)}
       </td>
-      <td className="py-3 px-4">
+      <td className="py-2 px-2 sm:py-3 sm:px-4">
         {station.costOfFillUp !== undefined ? formatPounds(station.costOfFillUp) : "—"}
       </td>
-      <td className="py-3 px-4">
+      <td className="py-2 px-2 sm:py-3 sm:px-4">
         {station.costToTravel !== undefined ? formatPounds(station.costToTravel) : "—"}
       </td>
-      <td className="py-3 px-4">{station.distance?.toFixed(1)} mi</td>
+      <td className="py-2 px-2 sm:py-3 sm:px-4">{station.distance?.toFixed(1)} mi</td>
     </tr>
   );
 }
