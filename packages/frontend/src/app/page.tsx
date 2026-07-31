@@ -71,7 +71,10 @@ export default function Home() {
   // UI state
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
   const [showSettings, setShowSettings] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !disclaimerDismissed;
+  });
 
   // Data state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -99,13 +102,6 @@ export default function Home() {
         setIsLoadingLocation(false);
       });
   }, []);
-
-  // Show disclaimer on load if not dismissed
-  useEffect(() => {
-    if (typeof window !== "undefined" && !disclaimerDismissed) {
-      setShowDisclaimer(true);
-    }
-  }, [disclaimerDismissed]);
 
   // Load station data
   useEffect(() => {
@@ -217,9 +213,11 @@ export default function Home() {
     <>
       <DisclaimerModal
         isOpen={showDisclaimer}
-        onClose={() => {
+        onClose={(neverShowAgain) => {
           setShowDisclaimer(false);
-          setDisclaimerDismissed(true);
+          if (neverShowAgain) {
+            setDisclaimerDismissed(true);
+          }
         }}
       />
       <Header viewMode={viewMode} onViewModeChange={setViewMode} />

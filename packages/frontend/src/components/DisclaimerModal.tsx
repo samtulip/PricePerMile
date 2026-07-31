@@ -5,19 +5,11 @@ import { useState } from "react";
 
 interface DisclaimerModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (neverShowAgain: boolean) => void;
 }
 
 export function DisclaimerModal({ isOpen, onClose }: DisclaimerModalProps) {
   const [neverShowAgain, setNeverShowAgain] = useState(false);
-
-  const handleClose = () => {
-    if (neverShowAgain) {
-      onClose();
-    } else {
-      onClose();
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -30,7 +22,7 @@ export function DisclaimerModal({ isOpen, onClose }: DisclaimerModalProps) {
           </h2>
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => onClose(false)}
             className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
             aria-label="Close disclaimer"
           >
@@ -98,13 +90,13 @@ export function DisclaimerModal({ isOpen, onClose }: DisclaimerModalProps) {
               aria-label="Don't show this message again"
             />
             <span className="text-sm text-slate-700 dark:text-slate-300">
-              Don't show this message again
+              Don&apos;t show this message again
             </span>
           </label>
 
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => onClose(neverShowAgain)}
             className="w-full bg-[var(--accent-600)] hover:bg-[var(--accent-700)] text-[var(--accent-on)] font-semibold py-2 px-4 rounded-lg transition-colors"
           >
             I Understand
