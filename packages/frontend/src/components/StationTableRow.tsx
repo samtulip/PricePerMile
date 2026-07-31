@@ -68,7 +68,7 @@ export function StationTableRow({
       <td className="py-2 px-2 sm:py-3 sm:px-4">
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
-            <div className="font-medium truncate">{station.name}</div>
+            <div className="font-medium break-words sm:truncate">{station.name}</div>
           </div>
           <button
             onClick={openWaze}
