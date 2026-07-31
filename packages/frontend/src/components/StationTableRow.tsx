@@ -88,13 +88,15 @@ export function StationTableRow({
       >
         {getSavingsLabel(savings, isSelected, isNegligibleDifference)}
       </td>
-      <td className="py-2 px-2 sm:py-3 sm:px-4">
+      <td className="hidden sm:table-cell py-2 px-2 sm:py-3 sm:px-4">
         {station.costOfFillUp !== undefined ? formatPounds(station.costOfFillUp) : "—"}
       </td>
-      <td className="py-2 px-2 sm:py-3 sm:px-4">
+      <td className="hidden sm:table-cell py-2 px-2 sm:py-3 sm:px-4">
         {station.costToTravel !== undefined ? formatPounds(station.costToTravel) : "—"}
       </td>
-      <td className="py-2 px-2 sm:py-3 sm:px-4">{station.distance?.toFixed(1)} mi</td>
+      <td className="hidden sm:table-cell py-2 px-2 sm:py-3 sm:px-4">
+        {station.distance?.toFixed(1)} mi
+      </td>
     </tr>
   );
 }
