@@ -17,6 +17,12 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
     }
   };
 
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDismiss();
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -33,7 +39,7 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
           </h2>
           <button
             type="button"
-            onClick={onDismiss}
+            onClick={handleButtonClick}
             className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
             aria-label="Close warning"
           >
@@ -58,7 +64,7 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
         <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-b-lg border-t border-slate-200 dark:border-slate-700">
           <button
             type="button"
-            onClick={onDismiss}
+            onClick={handleButtonClick}
             className="w-full px-4 py-2 bg-[var(--accent-600)] text-[var(--accent-on)] rounded-lg font-medium hover:bg-[var(--accent-700)] transition-colors"
           >
             I Understand
