@@ -25,9 +25,10 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 cursor-pointer"
       onClick={handleOverlayClick}
       role="presentation"
+      style={{ touchAction: "manipulation" }}
     >
       <div
         className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-md w-full"
@@ -40,7 +41,7 @@ export function RiskWarningModal({ isOpen, onDismiss }: RiskWarningModalProps) {
           <button
             type="button"
             onClick={handleButtonClick}
-            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
+            className="flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
             aria-label="Close warning"
           >
             <X className="w-5 h-5" />
