@@ -14,6 +14,7 @@ interface SettingsPanelProps {
   onRadiusChange: (radius: number) => void;
   defaultMpg: number;
   defaultFillUp: number;
+  onShowDisclaimer?: () => void;
 }
 
 const DEFAULT_MPG = 45;
@@ -30,6 +31,7 @@ export function SettingsPanel({
   onRadiusChange,
   defaultMpg = DEFAULT_MPG,
   defaultFillUp = DEFAULT_FILL_UP_LITRES,
+  onShowDisclaimer,
 }: SettingsPanelProps) {
   const { colorTheme, setColorTheme } = useTheme();
 
@@ -152,6 +154,16 @@ export function SettingsPanel({
           <option value="purple">Purple</option>
           <option value="high-contrast">High Contrast</option>
         </select>
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-slate-200">
+       <button
+         type="button"
+         onClick={onShowDisclaimer}
+         className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-medium py-2 px-4 rounded-lg transition-colors"
+       >
+         Show Disclaimer
+       </button>
       </div>
     </div>
   );

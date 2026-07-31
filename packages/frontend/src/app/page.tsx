@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { TableSection } from "@/components/TableSection";
 import { MapSection } from "@/components/MapSection";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation, RankedStation } from "@/types";
@@ -24,6 +25,7 @@ const STORAGE_KEYS = {
   milesPerGallon: "pricepermile_milesPerGallon",
   fillUpLitres: "pricepermile_fillUpLitres",
   selectedStationId: "pricepermile_selectedStationId",
+  disclaimerShown: "pricepermile_disclaimerShown",
 };
 
 type StationWithCosts = PetrolStation & {
@@ -60,10 +62,19 @@ export default function Home() {
     STORAGE_KEYS.selectedStationId,
     null
   );
+  const [disclaimerDismissed, setDisclaimerDismissed] = useLocalStorage<boolean>(
+    STORAGE_KEYS.disclaimerShown,
+    false,
+    (value) => typeof value === "boolean"
+  );
 
   // UI state
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
   const [showSettings, setShowSettings] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !disclaimerDismissed;
+  });
 
   // Data state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -200,6 +211,15 @@ export default function Home() {
 
   return (
     <>
+      <DisclaimerModal
+        isOpen={showDisclaimer}
+        onClose={(neverShowAgain) => {
+          setShowDisclaimer(false);
+          if (neverShowAgain) {
+            setDisclaimerDismissed(true);
+          }
+        }}
+      />
       <Header viewMode={viewMode} onViewModeChange={setViewMode} />
       <main className="flex-1 max-w-7xl mx-auto w-full px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 lg:p-6">
@@ -263,6 +283,7 @@ export default function Home() {
                 onRadiusChange={setRadiusMiles}
                 defaultMpg={DEFAULT_MPG}
                 defaultFillUp={DEFAULT_FILL_UP_LITRES}
+                onShowDisclaimer={() => setShowDisclaimer(true)}
               />
             </div>
           )}
