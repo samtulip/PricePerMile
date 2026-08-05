@@ -80,7 +80,14 @@ export function StationTableRow({
           </button>
         </div>
       </td>
-      <td className="py-2 px-2 sm:py-3 sm:px-4">{station.price?.toFixed(1)}p</td>
+      <td className="py-2 px-2 sm:py-3 sm:px-4">
+        <div className="flex flex-col gap-1">
+          <div>{station.price?.toFixed(1)}p</div>
+          <div className="text-xs text-slate-600">
+            {station.costOfFillUp !== undefined ? formatPounds(station.costOfFillUp) : "—"}
+          </div>
+        </div>
+      </td>
       <td
         className={`py-2 px-2 sm:py-3 sm:px-4 ${
           isNegligibleDifference ? "text-green-600" : "text-slate-700"
