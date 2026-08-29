@@ -106,6 +106,12 @@ The app structure supports:
 3. Savings comparison based on vehicle economy settings
 4. Persistent user preferences in localStorage
 
+#### localStorage Schema Versioning
+
+All user settings are stored under `pricepermile_*` keys via the `useLocalStorage` hook. A `STORAGE_SCHEMA_VERSION` constant in `src/app/page.tsx` guards against stale data from previous app versions: on page load all `pricepermile_*` keys are cleared whenever the stored version doesn't match, forcing the onboarding wizard to re-run with clean defaults.
+
+**When to bump the version:** increment `STORAGE_SCHEMA_VERSION` any time you add, remove, rename, or change the type of a stored key. This prevents existing users from ending up in a broken UI state after an upgrade.
+
 ## Deployment
 
 ### GitHub Pages Setup
