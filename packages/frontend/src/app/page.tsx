@@ -222,7 +222,7 @@ export default function Home() {
           role="region"
           aria-labelledby="settings-toggle"
           aria-hidden={!showSettings}
-          inert={!showSettings ? "" : undefined}
+          inert={!showSettings}
           className={showSettings ? "mb-4" : "mb-0 h-0 overflow-hidden"}
         >
           <SettingsPanel
