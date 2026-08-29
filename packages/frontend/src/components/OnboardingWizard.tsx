@@ -39,15 +39,22 @@ export function OnboardingWizard({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-      <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl">
-        <h2 className="text-xl font-semibold text-slate-900">Welcome to PricePerMile</h2>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl"
+      >
+        <h2 id="onboarding-title" className="text-xl font-semibold text-slate-900">
+          Welcome to PricePerMile
+        </h2>
         <p className="mt-2 text-sm text-slate-600">
           We do not use your data. Any settings you save stay on your device in local storage.
         </p>
 
         <div className="mt-5 space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Fuel type</label>
+          <fieldset>
+            <legend className="block text-sm font-medium mb-2">Fuel type</legend>
             <div className="flex gap-3">
               {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
                 <button
@@ -64,7 +71,7 @@ export function OnboardingWizard({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           <div>
             <label htmlFor="onboarding-mpg" className="block text-sm font-medium mb-2">
