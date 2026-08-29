@@ -27,6 +27,9 @@ jobs:
       - name: Download and convert latest fuel prices
         run: npm run sync:fuel-data
         working-directory: packages/frontend
+        env:
+          FUEL_FINDER_CLIENT_ID: ${{ secrets.FUEL_FINDER_CLIENT_ID }}
+          FUEL_FINDER_CLIENT_SECRET: ${{ secrets.FUEL_FINDER_CLIENT_SECRET }}
 
       - name: Check for data changes
         id: changes
