@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FuelType } from "@/types";
 
 interface OnboardingWizardProps {
@@ -23,10 +23,51 @@ export function OnboardingWizard({
   defaultRadiusMiles,
   onComplete,
 }: OnboardingWizardProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [fuelType, setFuelType] = useState<FuelType>(defaultFuel);
   const [milesPerGallon, setMilesPerGallon] = useState(defaultMpg);
   const [fillUpLitres, setFillUpLitres] = useState(defaultFillUpLitres);
   const [radiusMiles, setRadiusMiles] = useState(defaultRadiusMiles);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const getFocusableElements = () =>
+      Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(
+        (element) =>
+          !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true"
+      );
+
+    const focusableElements = getFocusableElements();
+    focusableElements[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+
+      const elements = getFocusableElements();
+      if (elements.length === 0) return;
+
+      const firstElement = elements[0];
+      const lastElement = elements[elements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => dialog.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const submit = () => {
     onComplete({
@@ -43,6 +84,7 @@ export function OnboardingWizard({
         role="dialog"
         aria-modal="true"
         aria-labelledby="onboarding-title"
+        ref={dialogRef}
         className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl"
       >
         <h2 id="onboarding-title" className="text-xl font-semibold text-slate-900">
