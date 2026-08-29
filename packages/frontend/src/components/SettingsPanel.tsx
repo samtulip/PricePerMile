@@ -14,6 +14,7 @@ interface SettingsPanelProps {
   onRadiusChange: (radius: number) => void;
   defaultMpg: number;
   defaultFillUp: number;
+  onOpenWizard: () => void;
 }
 
 const DEFAULT_MPG = 45;
@@ -30,6 +31,7 @@ export function SettingsPanel({
   onRadiusChange,
   defaultMpg = DEFAULT_MPG,
   defaultFillUp = DEFAULT_FILL_UP_LITRES,
+  onOpenWizard,
 }: SettingsPanelProps) {
   const { colorTheme, setColorTheme } = useTheme();
 
@@ -134,24 +136,33 @@ export function SettingsPanel({
           <div className="mt-2 text-sm text-slate-600">{radiusMiles} miles</div>
         </div>
       </div>
-      <div className="mt-4 pt-4 sm:mt-6 sm:pt-6 border-t border-slate-200">
-        <label htmlFor="color-theme" className="block text-sm font-medium mb-2">
-          Color theme
-        </label>
-        <select
-          id="color-theme"
-          value={colorTheme}
-          onChange={(event) =>
-            setColorTheme(event.target.value as "blue" | "green" | "purple" | "high-contrast")
-          }
-          className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 appearance-none"
-          aria-label="Select color theme"
+      <div className="mt-4 pt-4 sm:mt-6 sm:pt-6 border-t border-slate-200 flex flex-wrap items-end gap-4">
+        <div>
+          <label htmlFor="color-theme" className="block text-sm font-medium mb-2">
+            Color theme
+          </label>
+          <select
+            id="color-theme"
+            value={colorTheme}
+            onChange={(event) =>
+              setColorTheme(event.target.value as "blue" | "green" | "purple" | "high-contrast")
+            }
+            className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 appearance-none"
+            aria-label="Select color theme"
+          >
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="purple">Purple</option>
+            <option value="high-contrast">High Contrast</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenWizard}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
         >
-          <option value="blue">Blue</option>
-          <option value="green">Green</option>
-          <option value="purple">Purple</option>
-          <option value="high-contrast">High Contrast</option>
-        </select>
+          Reopen setup wizard
+        </button>
       </div>
     </div>
   );
