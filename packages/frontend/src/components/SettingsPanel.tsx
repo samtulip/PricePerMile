@@ -48,7 +48,7 @@ export function SettingsPanel({
   };
 
   return (
-    <div className="bg-white px-2 py-3 sm:rounded-lg sm:border sm:border-slate-200 sm:p-6">
+    <div className="bg-white p-3 sm:rounded-lg sm:border sm:border-slate-200 sm:p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div>
           <label className="block text-sm font-medium mb-2">Fuel type</label>
