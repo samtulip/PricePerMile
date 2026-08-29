@@ -1,13 +1,15 @@
 "use client";
 
-import { ListIcon, MapIcon } from "lucide-react";
+import { ListIcon, MapIcon, Settings2Icon } from "lucide-react";
 
 interface HeaderProps {
   viewMode: "table" | "map";
   onViewModeChange: (mode: "table" | "map") => void;
+  showSettings: boolean;
+  onToggleSettings: () => void;
 }
 
-export function Header({ viewMode, onViewModeChange }: HeaderProps) {
+export function Header({ viewMode, onViewModeChange, showSettings, onToggleSettings }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,7 +27,23 @@ export function Header({ viewMode, onViewModeChange }: HeaderProps) {
               Find the cheapest fuel near you
             </p>
           </div>
-          <div className="flex gap-3 bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              id="settings-toggle"
+              onClick={onToggleSettings}
+              className={`flex items-center justify-center rounded-lg border p-2 transition-colors ${
+                showSettings
+                  ? "border-slate-300 bg-slate-200 text-slate-900"
+                  : "border-slate-200 bg-white text-slate-600 hover:text-slate-900"
+              }`}
+              aria-expanded={showSettings}
+              aria-controls="settings-panel"
+              aria-label="Toggle settings"
+            >
+              <Settings2Icon className="h-5 w-5" />
+            </button>
+            <div className="flex gap-3 bg-slate-100 p-1 rounded-lg">
             <button
               type="button"
               onClick={() => onViewModeChange("table")}
@@ -52,6 +70,7 @@ export function Header({ viewMode, onViewModeChange }: HeaderProps) {
               <MapIcon className="w-4 h-4" />
               <span className="hidden sm:inline">Map</span>
             </button>
+            </div>
           </div>
         </div>
       </div>
