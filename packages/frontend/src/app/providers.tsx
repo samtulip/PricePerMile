@@ -11,6 +11,42 @@ const COLOR_THEME_CLASSES: Record<ColorTheme, string> = {
   "high-contrast": "theme-high-contrast",
 };
 
+function isColorTheme(value: unknown): value is ColorTheme {
+  return (
+    value === "blue" ||
+    value === "green" ||
+    value === "purple" ||
+    value === "high-contrast"
+  );
+}
+
+function getPersistedColorTheme(): ColorTheme | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const stored = window.localStorage.getItem("colorTheme");
+    if (stored === null) return null;
+
+    if (isColorTheme(stored)) {
+      return stored;
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      if (isColorTheme(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Fall back to cleanup below.
+    }
+
+    window.localStorage.removeItem("colorTheme");
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 interface ThemeContextType {
   colorTheme: ColorTheme;
   setColorTheme: (colorTheme: ColorTheme) => void;
@@ -20,28 +56,18 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [colorTheme, setColorTheme] = useState<ColorTheme>(() => {
-    if (typeof window === "undefined") {
-      return "blue";
-    }
-
-    const stored = window.localStorage.getItem("colorTheme");
-    if (
-      stored === "blue" ||
-      stored === "green" ||
-      stored === "purple" ||
-      stored === "high-contrast"
-    ) {
-      return stored;
-    }
-
-    return "blue";
+    return getPersistedColorTheme() ?? "blue";
   });
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove(...Object.values(COLOR_THEME_CLASSES));
     root.classList.add(COLOR_THEME_CLASSES[colorTheme]);
-    localStorage.setItem("colorTheme", colorTheme);
+    try {
+      localStorage.setItem("colorTheme", colorTheme);
+    } catch {
+      // Ignore persistence failures to keep the UI responsive.
+    }
   }, [colorTheme]);
 
   return (

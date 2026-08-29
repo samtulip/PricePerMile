@@ -1,5 +1,14 @@
 import { useState } from "react";
 
+function clearInvalidStoredValue(key: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage cleanup errors.
+  }
+}
+
 /**
  * Custom hook for managing state with localStorage persistence
  * Handles SSR safely and validates numeric values
@@ -26,15 +35,43 @@ export function useLocalStorage<T>(
         return initialValue;
       }
 
-      const parsed = JSON.parse(item);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(item);
+      } catch {
+        // Backward compatibility for earlier raw string/number/boolean storage formats.
+        if (typeof initialValue === "string") {
+          parsed = item;
+        } else if (typeof initialValue === "number") {
+          const parsedNumber = Number(item);
+          if (!Number.isNaN(parsedNumber)) {
+            parsed = parsedNumber;
+          } else {
+            clearInvalidStoredValue(key);
+            return initialValue;
+          }
+        } else if (typeof initialValue === "boolean") {
+          if (item === "true" || item === "false") {
+            parsed = item === "true";
+          } else {
+            clearInvalidStoredValue(key);
+            return initialValue;
+          }
+        } else {
+          clearInvalidStoredValue(key);
+          return initialValue;
+        }
+      }
 
       // Handle numeric values with NaN validation
       if (typeof parsed === "number" && Number.isNaN(parsed)) {
+        clearInvalidStoredValue(key);
         return initialValue;
       }
 
       // Use custom validator if provided
       if (validator && !validator(parsed)) {
+        clearInvalidStoredValue(key);
         return initialValue;
       }
 
@@ -48,6 +85,7 @@ export function useLocalStorage<T>(
     try {
       // Check for NaN values
       if (typeof value === "number" && Number.isNaN(value)) {
+        clearInvalidStoredValue(key);
         setStoredValue(initialValue);
         return;
       }
