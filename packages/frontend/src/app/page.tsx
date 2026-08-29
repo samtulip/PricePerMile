@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { TableSection } from "@/components/TableSection";
 import { MapSection } from "@/components/MapSection";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation, RankedStation } from "@/types";
@@ -22,6 +23,7 @@ const STORAGE_KEYS = {
   milesPerGallon: "pricepermile_milesPerGallon",
   fillUpLitres: "pricepermile_fillUpLitres",
   selectedStationId: "pricepermile_selectedStationId",
+  onboardingComplete: "pricepermile_onboardingComplete",
 };
 
 type StationWithCosts = PetrolStation & {
@@ -57,6 +59,11 @@ export default function Home() {
   const [selectedStationId, setSelectedStationId] = useLocalStorage<string | null>(
     STORAGE_KEYS.selectedStationId,
     null
+  );
+  const [onboardingComplete, setOnboardingComplete] = useLocalStorage<boolean>(
+    STORAGE_KEYS.onboardingComplete,
+    false,
+    (value) => typeof value === "boolean"
   );
   // UI state
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
@@ -188,6 +195,21 @@ export default function Home() {
 
   return (
     <>
+      {!onboardingComplete && (
+        <OnboardingWizard
+          defaultFuel={selectedFuel}
+          defaultMpg={milesPerGallon}
+          defaultFillUpLitres={fillUpLitres}
+          defaultRadiusMiles={radiusMiles}
+          onComplete={({ fuelType, milesPerGallon, fillUpLitres, radiusMiles }) => {
+            setSelectedFuel(fuelType);
+            setMilesPerGallon(milesPerGallon);
+            setFillUpLitres(fillUpLitres);
+            setRadiusMiles(radiusMiles);
+            setOnboardingComplete(true);
+          }}
+        />
+      )}
       <Header
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -198,9 +220,10 @@ export default function Home() {
         <div
           id="settings-panel"
           role="region"
-          aria-label="Settings"
+          aria-labelledby="settings-toggle"
           aria-hidden={!showSettings}
-          className={showSettings ? "mb-4" : "hidden"}
+          inert={!showSettings ? "" : undefined}
+          className={showSettings ? "mb-4" : "mb-0 h-0 overflow-hidden"}
         >
           <SettingsPanel
             selectedFuel={selectedFuel}
