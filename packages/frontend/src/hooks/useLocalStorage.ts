@@ -85,8 +85,10 @@ export function useLocalStorage<T>(
     try {
       // Check for NaN values
       if (typeof value === "number" && Number.isNaN(value)) {
-        clearInvalidStoredValue(key);
         setStoredValue(initialValue);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(key, JSON.stringify(initialValue));
+        }
         return;
       }
 
