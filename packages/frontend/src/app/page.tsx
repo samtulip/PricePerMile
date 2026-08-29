@@ -8,7 +8,6 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation, RankedStation } from "@/types";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 const DEFAULT_FUEL: FuelType = "petrol";
 const DEFAULT_RADIUS = 7;
@@ -189,8 +188,34 @@ export default function Home() {
 
   return (
     <>
-      <Header viewMode={viewMode} onViewModeChange={setViewMode} />
+      <Header
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showSettings={showSettings}
+        onToggleSettings={() => setShowSettings((current) => !current)}
+      />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div
+          id="settings-panel"
+          role="region"
+          aria-label="Settings"
+          aria-hidden={!showSettings}
+          className={showSettings ? "mb-4" : "hidden"}
+        >
+          <SettingsPanel
+            selectedFuel={selectedFuel}
+            onFuelChange={setSelectedFuel}
+            milesPerGallon={milesPerGallon}
+            onMpgChange={setMilesPerGallon}
+            fillUpLitres={fillUpLitres}
+            onFillUpChange={setFillUpLitres}
+            radiusMiles={radiusMiles}
+            onRadiusChange={setRadiusMiles}
+            defaultMpg={DEFAULT_MPG}
+            defaultFillUp={DEFAULT_FILL_UP_LITRES}
+          />
+        </div>
+
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           {viewMode === "table" ? (
             <TableSection
@@ -214,46 +239,6 @@ export default function Home() {
               error={error}
               radiusMiles={radiusMiles}
             />
-          )}
-        </div>
-
-        <div className="mt-4">
-          <button
-            type="button"
-            id="settings-toggle"
-            onClick={() => setShowSettings(!showSettings)}
-            className="w-full flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-left font-medium transition-colors hover:bg-slate-50"
-            aria-expanded={showSettings}
-            aria-controls="settings-panel"
-          >
-            <span>Settings</span>
-            {showSettings ? (
-              <ChevronUpIcon className="w-5 h-5 text-slate-500" />
-            ) : (
-              <ChevronDownIcon className="w-5 h-5 text-slate-500" />
-            )}
-          </button>
-
-          {showSettings && (
-            <div
-              id="settings-panel"
-              role="region"
-              aria-labelledby="settings-toggle"
-              className="mt-4"
-            >
-              <SettingsPanel
-                selectedFuel={selectedFuel}
-                onFuelChange={setSelectedFuel}
-                milesPerGallon={milesPerGallon}
-                onMpgChange={setMilesPerGallon}
-                fillUpLitres={fillUpLitres}
-                onFillUpChange={setFillUpLitres}
-                radiusMiles={radiusMiles}
-                onRadiusChange={setRadiusMiles}
-                defaultMpg={DEFAULT_MPG}
-                defaultFillUp={DEFAULT_FILL_UP_LITRES}
-              />
-            </div>
           )}
         </div>
       </main>
