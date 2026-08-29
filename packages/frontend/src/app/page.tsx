@@ -195,27 +195,26 @@ export default function Home() {
         onToggleSettings={() => setShowSettings((current) => !current)}
       />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        {showSettings && (
-          <div
-            id="settings-panel"
-            role="region"
-            aria-labelledby="settings-toggle"
-            className="mb-4"
-          >
-            <SettingsPanel
-              selectedFuel={selectedFuel}
-              onFuelChange={setSelectedFuel}
-              milesPerGallon={milesPerGallon}
-              onMpgChange={setMilesPerGallon}
-              fillUpLitres={fillUpLitres}
-              onFillUpChange={setFillUpLitres}
-              radiusMiles={radiusMiles}
-              onRadiusChange={setRadiusMiles}
-              defaultMpg={DEFAULT_MPG}
-              defaultFillUp={DEFAULT_FILL_UP_LITRES}
-            />
-          </div>
-        )}
+        <div
+          id="settings-panel"
+          role="region"
+          aria-label="Settings"
+          aria-hidden={!showSettings}
+          className={showSettings ? "mb-4" : "hidden"}
+        >
+          <SettingsPanel
+            selectedFuel={selectedFuel}
+            onFuelChange={setSelectedFuel}
+            milesPerGallon={milesPerGallon}
+            onMpgChange={setMilesPerGallon}
+            fillUpLitres={fillUpLitres}
+            onFillUpChange={setFillUpLitres}
+            radiusMiles={radiusMiles}
+            onRadiusChange={setRadiusMiles}
+            defaultMpg={DEFAULT_MPG}
+            defaultFillUp={DEFAULT_FILL_UP_LITRES}
+          />
+        </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           {viewMode === "table" ? (
