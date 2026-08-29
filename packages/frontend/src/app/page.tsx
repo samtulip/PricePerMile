@@ -17,7 +17,13 @@ const DEFAULT_FILL_UP_LITRES = 40;
 const TABLE_PAGE_SIZE = 10;
 const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 
+// Increment this whenever the shape or meaning of any stored keys changes.
+// On mismatch all pricepermile_* keys are cleared so the wizard re-runs
+// with clean defaults, preventing unresponsive state from dirty storage.
+const STORAGE_SCHEMA_VERSION = "1";
+
 const STORAGE_KEYS = {
+  schemaVersion: "pricepermile_schemaVersion",
   fuelType: "pricepermile_fuelType",
   radiusMiles: "pricepermile_radiusMiles",
   milesPerGallon: "pricepermile_milesPerGallon",
@@ -25,6 +31,23 @@ const STORAGE_KEYS = {
   selectedStationId: "pricepermile_selectedStationId",
   onboardingComplete: "pricepermile_onboardingComplete",
 };
+
+// Run synchronously at module-load time (client only) so that all
+// useLocalStorage initialisers see clean storage when the schema changes.
+if (typeof window !== "undefined") {
+  try {
+    const storedVersion = localStorage.getItem(STORAGE_KEYS.schemaVersion);
+    if (storedVersion !== STORAGE_SCHEMA_VERSION) {
+      const keysToRemove = Object.keys(localStorage).filter((key) =>
+        key.startsWith("pricepermile_")
+      );
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      localStorage.setItem(STORAGE_KEYS.schemaVersion, STORAGE_SCHEMA_VERSION);
+    }
+  } catch {
+    // localStorage unavailable (e.g. private browsing with strict settings) — ignore
+  }
+}
 
 type StationWithCosts = PetrolStation & {
   distance: number;
