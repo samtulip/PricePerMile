@@ -68,6 +68,7 @@ export default function Home() {
   // UI state
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
   const [showSettings, setShowSettings] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
 
   // Data state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -195,7 +196,7 @@ export default function Home() {
 
   return (
     <>
-      {!onboardingComplete && (
+      {(!onboardingComplete || showWizard) && (
         <OnboardingWizard
           defaultFuel={selectedFuel}
           defaultMpg={milesPerGallon}
@@ -207,6 +208,7 @@ export default function Home() {
             setFillUpLitres(fillUpLitres);
             setRadiusMiles(radiusMiles);
             setOnboardingComplete(true);
+            setShowWizard(false);
           }}
         />
       )}
@@ -236,6 +238,10 @@ export default function Home() {
             onRadiusChange={setRadiusMiles}
             defaultMpg={DEFAULT_MPG}
             defaultFillUp={DEFAULT_FILL_UP_LITRES}
+            onOpenWizard={() => {
+              setShowSettings(false);
+              setShowWizard(true);
+            }}
           />
         </div>
 
