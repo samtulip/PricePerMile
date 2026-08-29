@@ -222,7 +222,7 @@ export default function Home() {
           role="region"
           aria-label="Settings"
           aria-hidden={!showSettings}
-          className={showSettings ? "mb-4" : "hidden"}
+          className={showSettings ? "mb-4" : "mb-0 h-0 overflow-hidden"}
         >
           <SettingsPanel
             selectedFuel={selectedFuel}
