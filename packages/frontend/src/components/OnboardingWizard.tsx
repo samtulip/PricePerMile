@@ -116,7 +116,7 @@ export function OnboardingWizard({
           We do not use your data. Any settings you save stay on your device in local storage.
         </p>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          Press Escape any time to continue with your current values.
+          Press Escape any time to save your current values and continue.
         </p>
 
         <div className="mt-5 space-y-4">
