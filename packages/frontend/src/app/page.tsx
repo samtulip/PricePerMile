@@ -216,14 +216,14 @@ export default function Home() {
         showSettings={showSettings}
         onToggleSettings={() => setShowSettings((current) => !current)}
       />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-0 sm:px-6 lg:px-8 py-3 sm:py-8">
         <div
           id="settings-panel"
           role="region"
           aria-labelledby="settings-toggle"
           aria-hidden={!showSettings}
           inert={!showSettings || undefined}
-          className={showSettings ? "mb-4" : "mb-0 h-0 overflow-hidden"}
+          className={showSettings ? "mb-3 sm:mb-4" : "mb-0 h-0 overflow-hidden"}
         >
           <SettingsPanel
             selectedFuel={selectedFuel}
@@ -239,7 +239,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <div className="bg-white p-0 sm:rounded-lg sm:border sm:border-slate-200 sm:p-6">
           {viewMode === "table" ? (
             <TableSection
               stations={nearbyStations}

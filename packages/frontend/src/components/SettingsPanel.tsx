@@ -48,8 +48,8 @@ export function SettingsPanel({
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="bg-white p-3 sm:rounded-lg sm:border sm:border-slate-200 sm:p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div>
           <label className="block text-sm font-medium mb-2">Fuel type</label>
           <div className="flex gap-3">
@@ -134,7 +134,7 @@ export function SettingsPanel({
           <div className="mt-2 text-sm text-slate-600">{radiusMiles} miles</div>
         </div>
       </div>
-      <div className="mt-6 pt-6 border-t border-slate-200">
+      <div className="mt-4 pt-4 sm:mt-6 sm:pt-6 border-t border-slate-200">
         <label htmlFor="color-theme" className="block text-sm font-medium mb-2">
           Color theme
         </label>

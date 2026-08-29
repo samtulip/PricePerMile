@@ -48,10 +48,10 @@ export function TableSection({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 px-2 sm:px-0">
         <div>
-          <h2 className="text-xl font-semibold">Fuel Prices by Station</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">Fuel Prices by Station</h2>
           <p className="text-sm text-slate-500 mt-1">
             Showing stations within {radiusMiles} miles of your device location.
           </p>
@@ -72,7 +72,7 @@ export function TableSection({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <div className="overflow-x-auto border-y border-slate-200 bg-white sm:rounded-lg sm:border">
         <table className="w-full text-sm table-fixed sm:table-auto">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
@@ -107,7 +107,7 @@ export function TableSection({
       </div>
 
       {stations.length > pageSize && (
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-3 sm:gap-4 px-2 sm:px-0">
           <button
             type="button"
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}

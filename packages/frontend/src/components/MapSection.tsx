@@ -23,8 +23,8 @@ export function MapSection({
   radiusMiles,
 }: MapSectionProps) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Fuel Prices Map</h2>
+    <div className="space-y-3 sm:space-y-4 px-2 sm:px-0">
+      <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Fuel Prices Map</h2>
       {isLoading ? (
         <div className="w-full bg-slate-100 rounded-lg flex items-center justify-center aspect-video">
           <p className="text-slate-500">Loading map data...</p>
@@ -41,7 +41,7 @@ export function MapSection({
         </div>
       ) : (
         <>
-          <div className="rounded-lg overflow-hidden border border-slate-200">
+          <div className="overflow-hidden border-y border-slate-200 sm:rounded-lg sm:border">
             <StationsMap stations={stations} userLocation={userLocation} />
           </div>
           <p className="text-sm text-slate-600">
