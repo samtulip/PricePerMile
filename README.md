@@ -63,6 +63,7 @@ npm run dev
 - `npm start` - Start the production server (local testing)
 - `npm run export` - Export static site to `./out`
 - `npm run convert:stations -- <input.csv> [output.json]` - Convert a flat forecourt CSV into station JSON (defaults to `public/data/stations.json`)
+- `npm run sync:fuel-data` - Download and convert latest fuel data from the public UK Gov Fuel Finder CSV endpoint
 
 ### Project Structure
 
@@ -112,6 +113,7 @@ The app structure supports:
 1. Enable GitHub Pages in repository settings
 2. Set source to "GitHub Actions"
 3. The CI/CD pipeline will automatically deploy on push to `main`
+4. A scheduled workflow (`Update Fuel Data`) updates `packages/frontend/public/data/stations.json` daily and commits changes to `main`, which triggers a fresh deploy when data changes
 
 ### Environment Variables
 
@@ -161,6 +163,11 @@ Future integrations may require secrets:
 1. Go to Repository Settings → Secrets and Variables → Actions
 2. Add required secrets
 3. Reference in GitHub Actions workflow using `${{ secrets.SECRET_NAME }}`
+
+Automated fuel data updates use the public UK Gov Fuel Finder endpoint and do not require authentication secrets.
+
+Optional override:
+- `FUEL_FINDER_SOURCE_URL` - Override source URL (defaults to `https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv`)
 
 ## Browser Support
 

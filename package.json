@@ -15,6 +15,7 @@
     "start": "npm run start --workspace=packages/frontend",
     "lint": "npm run lint --workspace=packages/frontend",
     "export": "npm run export --workspace=packages/frontend",
-    "convert:stations": "npm run convert:stations --workspace=packages/frontend"
+    "convert:stations": "npm run convert:stations --workspace=packages/frontend",
+    "sync:fuel-data": "npm run sync:fuel-data --workspace=packages/frontend"
   }
 }
