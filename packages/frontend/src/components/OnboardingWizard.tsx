@@ -41,6 +41,21 @@ export function OnboardingWizard({
     const dialog = dialogRef.current;
     if (!dialog) return;
 
+    const focusableElements = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter(
+      (element) =>
+        !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true"
+    );
+    focusableElements[0]?.focus();
+  }, []);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
     const getFocusableElements = () =>
       Array.from(
         dialog.querySelectorAll<HTMLElement>(
@@ -50,9 +65,6 @@ export function OnboardingWizard({
         (element) =>
           !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true"
       );
-
-    const focusableElements = getFocusableElements();
-    focusableElements[0]?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -93,13 +105,14 @@ export function OnboardingWizard({
         role="dialog"
         aria-modal="true"
         aria-labelledby="onboarding-title"
+        aria-describedby="onboarding-desc"
         ref={dialogRef}
         className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-800"
       >
         <h2 id="onboarding-title" className="text-xl font-semibold text-slate-900 dark:text-slate-100">
           Welcome to PricePerMile
         </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <p id="onboarding-desc" className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           We do not use your data. Any settings you save stay on your device in local storage.
         </p>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
