@@ -27,12 +27,6 @@ jobs:
       - name: Download and convert latest fuel prices
         run: npm run sync:fuel-data
         working-directory: packages/frontend
-        env:
-          FUEL_FINDER_SOURCE_URL: ${{ secrets.FUEL_FINDER_SOURCE_URL }}
-          FUEL_FINDER_API_KEY: ${{ secrets.FUEL_FINDER_API_KEY }}
-          FUEL_FINDER_API_KEY_HEADER: ${{ secrets.FUEL_FINDER_API_KEY_HEADER }}
-          FUEL_FINDER_AUTH_TOKEN: ${{ secrets.FUEL_FINDER_AUTH_TOKEN }}
-          FUEL_FINDER_AUTH_SCHEME: ${{ secrets.FUEL_FINDER_AUTH_SCHEME }}
 
       - name: Check for data changes
         id: changes

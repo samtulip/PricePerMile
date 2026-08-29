@@ -63,7 +63,7 @@ npm run dev
 - `npm start` - Start the production server (local testing)
 - `npm run export` - Export static site to `./out`
 - `npm run convert:stations -- <input.csv> [output.json]` - Convert a flat forecourt CSV into station JSON (defaults to `public/data/stations.json`)
-- `npm run sync:fuel-data` - Download and convert latest fuel data from the configured UK Gov Fuel Finder source URL
+- `npm run sync:fuel-data` - Download and convert latest fuel data from the public UK Gov Fuel Finder CSV endpoint
 
 ### Project Structure
 
@@ -164,12 +164,10 @@ Future integrations may require secrets:
 2. Add required secrets
 3. Reference in GitHub Actions workflow using `${{ secrets.SECRET_NAME }}`
 
-For automated fuel data updates, configure:
-- `FUEL_FINDER_SOURCE_URL` (**required**) - UK Gov Fuel Finder CSV endpoint
-- `FUEL_FINDER_API_KEY` (optional) - API key value
-- `FUEL_FINDER_API_KEY_HEADER` (optional) - API key header name (defaults to `x-api-key`)
-- `FUEL_FINDER_AUTH_TOKEN` (optional) - bearer/auth token
-- `FUEL_FINDER_AUTH_SCHEME` (optional) - auth scheme for `Authorization` header (defaults to `Bearer`)
+Automated fuel data updates use the public UK Gov Fuel Finder endpoint and do not require authentication secrets.
+
+Optional override:
+- `FUEL_FINDER_SOURCE_URL` - Override source URL (defaults to `https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv`)
 
 ## Browser Support
 

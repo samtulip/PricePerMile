@@ -5,55 +5,79 @@ import os from "node:os";
 import path from "node:path";
 import { convertCsvToStations } from "./convert-stations-csv.mjs";
 
-function getRequiredEnv(name) {
-  const value = process.env[name]?.trim();
+const DEFAULT_SOURCE_URL =
+  "https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv";
+
+function sanitizeFilename(value) {
+  const base = path.basename(value).trim();
+  const safe = base.replace(/[^a-zA-Z0-9._-]/g, "_");
+  if (!safe) {
+    return "fuel-prices.csv";
+  }
+
+  return safe.endsWith(".csv") ? safe : `${safe}.csv`;
+}
+
+function getFilenameFromContentDisposition(value) {
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+    return undefined;
   }
-  return value;
+
+  const utf8Match = value.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return sanitizeFilename(decodeURIComponent(utf8Match[1]));
+  }
+
+  const quotedMatch = value.match(/filename="([^"]+)"/i);
+  if (quotedMatch?.[1]) {
+    return sanitizeFilename(quotedMatch[1]);
+  }
+
+  const plainMatch = value.match(/filename=([^;]+)/i);
+  if (plainMatch?.[1]) {
+    return sanitizeFilename(plainMatch[1].trim());
+  }
+
+  return undefined;
 }
 
-function buildHeaders() {
-  const headers = {};
-  const apiKey = process.env.FUEL_FINDER_API_KEY?.trim();
-  const apiKeyHeader = process.env.FUEL_FINDER_API_KEY_HEADER?.trim() || "x-api-key";
-  const authToken = process.env.FUEL_FINDER_AUTH_TOKEN?.trim();
-  const authScheme = process.env.FUEL_FINDER_AUTH_SCHEME?.trim() || "Bearer";
-
-  if (apiKey) {
-    headers[apiKeyHeader] = apiKey;
+function getFilenameFromUrl(url) {
+  const pathname = new URL(url).pathname;
+  const lastPart = pathname.split("/").filter(Boolean).pop();
+  if (!lastPart) {
+    return "fuel-prices.csv";
   }
 
-  if (authToken) {
-    headers.Authorization = `${authScheme} ${authToken}`;
-  }
-
-  return headers;
+  return sanitizeFilename(lastPart);
 }
 
-async function downloadCsv(url, headers) {
-  const response = await fetch(url, { headers });
+async function downloadCsv(url) {
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Download failed: HTTP ${response.status} ${response.statusText}`);
   }
 
-  return response.text();
+  const contentDisposition = response.headers.get("content-disposition");
+  const filename =
+    getFilenameFromContentDisposition(contentDisposition) || getFilenameFromUrl(url);
+  const content = await response.text();
+
+  return { filename, content };
 }
 
 async function main() {
-  const sourceUrl = getRequiredEnv("FUEL_FINDER_SOURCE_URL");
+  const sourceUrl = process.env.FUEL_FINDER_SOURCE_URL?.trim() || DEFAULT_SOURCE_URL;
   const outputPath = path.resolve(
     process.cwd(),
     process.env.FUEL_FINDER_OUTPUT_PATH || "public/data/stations.json"
   );
-  const headers = buildHeaders();
 
-  const csvContent = await downloadCsv(sourceUrl, headers);
+  const { filename, content } = await downloadCsv(sourceUrl);
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "pricepermile-fuel-sync-"));
-  const tempCsvPath = path.join(tempDir, "fuel-prices.csv");
+  const tempCsvPath = path.join(tempDir, filename);
 
   try {
-    fs.writeFileSync(tempCsvPath, csvContent, "utf8");
+    fs.writeFileSync(tempCsvPath, content, "utf8");
     const count = convertCsvToStations(tempCsvPath, outputPath);
     console.log(`Synced ${count} stations to ${outputPath}`);
   } finally {
