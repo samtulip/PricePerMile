@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "export": "npm run build",
-    "convert:stations": "node scripts/convert-stations-csv.mjs"
+    "convert:stations": "node scripts/convert-stations-csv.mjs",
+    "sync:fuel-data": "node scripts/sync-fuel-prices.mjs"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",

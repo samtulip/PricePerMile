@@ -1,0 +1,53 @@
+name: Update Fuel Data
+
+on:
+  schedule:
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-fuel-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download and convert latest fuel prices
+        run: npm run sync:fuel-data
+        working-directory: packages/frontend
+        env:
+          FUEL_FINDER_SOURCE_URL: ${{ secrets.FUEL_FINDER_SOURCE_URL }}
+          FUEL_FINDER_API_KEY: ${{ secrets.FUEL_FINDER_API_KEY }}
+          FUEL_FINDER_API_KEY_HEADER: ${{ secrets.FUEL_FINDER_API_KEY_HEADER }}
+          FUEL_FINDER_AUTH_TOKEN: ${{ secrets.FUEL_FINDER_AUTH_TOKEN }}
+          FUEL_FINDER_AUTH_SCHEME: ${{ secrets.FUEL_FINDER_AUTH_SCHEME }}
+
+      - name: Check for data changes
+        id: changes
+        run: |
+          if git diff --quiet -- packages/frontend/public/data/stations.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push updated data
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/frontend/public/data/stations.json
+          git commit -m "chore(data): update fuel station prices"
+          git push

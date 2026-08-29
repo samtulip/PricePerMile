@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const FUEL_CODES = ["E5", "E10", "B7S", "B7P", "B10", "HVO"];
 const PETROL_PREFERENCE = ["E10", "E5"];
@@ -191,7 +192,7 @@ function rowToStation(row, fallbackIndex) {
   };
 }
 
-function convertCsvToStations(inputPath, outputPath) {
+export function convertCsvToStations(inputPath, outputPath) {
   const csvContent = fs.readFileSync(inputPath, "utf8");
   const records = parseCsv(csvContent);
 
@@ -234,4 +235,10 @@ function main() {
   console.log(`Converted ${count} stations to ${outputPath}`);
 }
 
-main();
+const isDirectExecution = process.argv[1]
+  ? import.meta.url === pathToFileURL(process.argv[1]).href
+  : false;
+
+if (isDirectExecution) {
+  main();
+}
