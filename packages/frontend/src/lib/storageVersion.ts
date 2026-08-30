@@ -26,6 +26,12 @@ export function initializeStorage(): boolean {
 
   try {
     const stored = localStorage.getItem(STORAGE_VERSION_KEY);
+    const legacyKeysToRemove = LEGACY_STORAGE_KEYS.filter((key) => localStorage.getItem(key) !== null);
+
+    if (stored === String(STORAGE_VERSION)) {
+      legacyKeysToRemove.forEach((key) => localStorage.removeItem(key));
+      return false;
+    }
 
     const keysToRemove = new Set<string>();
     for (let i = 0; i < localStorage.length; i++) {
@@ -35,15 +41,7 @@ export function initializeStorage(): boolean {
       }
     }
 
-    LEGACY_STORAGE_KEYS.forEach((key) => {
-      if (localStorage.getItem(key) !== null) {
-        keysToRemove.add(key);
-      }
-    });
-
-    if (stored === String(STORAGE_VERSION) && keysToRemove.size === 0) {
-      return false;
-    }
+    legacyKeysToRemove.forEach((key) => keysToRemove.add(key));
 
     if (keysToRemove.size === 0) {
       localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));

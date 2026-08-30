@@ -10,9 +10,7 @@ import type { PetrolStation, UserLocation } from "@/types";
 
 vi.mock("@/lib/geolocation", () => ({
   calculateDistance: vi.fn((_lat1, _lon1, lat2: number) => lat2),
-  calculateCostToTravel: vi.fn((distance: number, milesPerGallon: number, fuelPrice: number) =>
-    Math.round(distance + milesPerGallon + fuelPrice)
-  ),
+  calculateCostToTravel: vi.fn((distance: number) => Math.round(distance * 10)),
 }));
 
 const userLocation: UserLocation = {
@@ -38,7 +36,7 @@ const stations: PetrolStation[] = [
     address: "B",
     latitude: 2,
     longitude: 0,
-    prices: [{ type: "petrol", price: 149, lastUpdated: "2026-08-30T00:00:00Z" }],
+    prices: [{ type: "petrol", price: 140, lastUpdated: "2026-08-30T00:00:00Z" }],
   },
   {
     id: "missing-fuel",
@@ -76,9 +74,9 @@ describe("stationRanking", () => {
     expect(rankedStations[0]).toMatchObject({
       price: 150,
       distance: 1,
-      costToTravel: 196,
+      costToTravel: 10,
       costOfFillUp: 150,
-      totalCost: 346,
+      totalCost: 160,
     });
   });
 
@@ -108,9 +106,9 @@ describe("stationRanking", () => {
       fillUpLitres: 1,
     });
 
-    expect(getBestTotalCost(rankedStations)).toBe(346);
-    expect(getReferenceStationCost(rankedStations, "same-total-further")).toBe(346);
-    expect(getReferenceStationCost(rankedStations, null)).toBe(346);
+    expect(getBestTotalCost(rankedStations)).toBe(160);
+    expect(getReferenceStationCost(rankedStations, "same-total-further")).toBe(160);
+    expect(getReferenceStationCost(rankedStations, null)).toBe(160);
   });
 
   it("returns only fully ranked stations for the map and clamps pagination bounds", () => {
@@ -124,7 +122,7 @@ describe("stationRanking", () => {
     });
 
     expect(getTopRankedStations(rankedStations, 1).map((station) => station.id)).toEqual([
-      "outside-radius",
+      "closest-cheapest",
     ]);
     expect(getPaginationWindow(rankedStations.length, 99, 2)).toEqual({
       currentPage: 2,

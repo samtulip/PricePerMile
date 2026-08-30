@@ -18,7 +18,7 @@
 
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { STORAGE_KEYS } from "@/features/settings/config";
 import { STORAGE_VERSION, STORAGE_VERSION_KEY } from "@/lib/storageVersion";
 
@@ -91,11 +91,13 @@ afterEach(() => {
 async function renderHome() {
   const { ThemeProvider } = await import("@/app/providers");
   const { default: Home } = await import("@/app/page");
-  render(
-    <ThemeProvider>
-      <Home />
-    </ThemeProvider>
-  );
+  await act(async () => {
+    render(
+      <ThemeProvider>
+        <Home />
+      </ThemeProvider>
+    );
+  });
 }
 
 // ---------------------------------------------------------------------------

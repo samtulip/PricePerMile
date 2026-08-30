@@ -1,6 +1,6 @@
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 
 const getUserLocationMock = vi.fn();
 
@@ -20,11 +20,13 @@ vi.mock("@/lib/geolocation", async () => {
 async function renderHome() {
   const { ThemeProvider } = await import("@/app/providers");
   const { default: Home } = await import("@/app/page");
-  render(
-    <ThemeProvider>
-      <Home />
-    </ThemeProvider>
-  );
+  await act(async () => {
+    render(
+      <ThemeProvider>
+        <Home />
+      </ThemeProvider>
+    );
+  });
 }
 
 describe("Home error handling", () => {
