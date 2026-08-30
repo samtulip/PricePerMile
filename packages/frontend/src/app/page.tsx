@@ -7,6 +7,7 @@ import { MapSection } from "@/components/MapSection";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useStorageVersion } from "@/hooks/useStorageVersion";
 import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
 import type { FuelType, PetrolStation, UserLocation, RankedStation } from "@/types";
 
@@ -58,6 +59,9 @@ type StationWithCosts = PetrolStation & {
 };
 
 export default function Home() {
+  // Run version check first so useLocalStorage reads see clean state on migration
+  useStorageVersion();
+
   // Persisted settings using custom hook
   const [selectedFuel, setSelectedFuel] = useLocalStorage<FuelType>(
     STORAGE_KEYS.fuelType,
