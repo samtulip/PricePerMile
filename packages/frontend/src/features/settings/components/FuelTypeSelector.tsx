@@ -19,6 +19,7 @@ export function FuelTypeSelector({
           type="button"
           key={fuel}
           onClick={() => onChange(fuel)}
+          aria-pressed={selectedFuel === fuel}
           className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
             selectedFuel === fuel
               ? "bg-[var(--accent-600)] text-[var(--accent-on)]"

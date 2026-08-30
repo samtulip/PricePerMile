@@ -60,25 +60,23 @@ export function rankStations({
         station.longitude
       );
       const fuelPrice = station.prices.find((price) => price.type === selectedFuel);
+      if (!fuelPrice) {
+        return null;
+      }
 
-      const costToTravel = fuelPrice
-        ? calculateCostToTravel(distance, milesPerGallon, fuelPrice.price)
-        : undefined;
-      const costOfFillUp = fuelPrice ? Math.round(fillUpLitres * fuelPrice.price) : undefined;
+      const costToTravel = calculateCostToTravel(distance, milesPerGallon, fuelPrice.price);
+      const costOfFillUp = Math.round(fillUpLitres * fuelPrice.price);
 
       return {
         ...station,
         distance,
-        price: fuelPrice?.price,
+        price: fuelPrice.price,
         costToTravel,
         costOfFillUp,
-        totalCost:
-          costToTravel !== undefined && costOfFillUp !== undefined
-            ? costToTravel + costOfFillUp
-            : undefined,
+        totalCost: costToTravel + costOfFillUp,
       };
     })
-    .filter((station): station is StationWithCosts => station.price !== undefined)
+    .filter((station): station is StationWithCosts => station !== null)
     .filter((station) => station.distance <= radiusMiles)
     .sort(compareStations);
 }
