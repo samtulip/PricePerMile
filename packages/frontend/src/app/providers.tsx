@@ -1,15 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-
-type ColorTheme = "blue" | "green" | "purple" | "high-contrast";
-
-const COLOR_THEME_CLASSES: Record<ColorTheme, string> = {
-  blue: "theme-blue",
-  green: "theme-green",
-  purple: "theme-purple",
-  "high-contrast": "theme-high-contrast",
-};
+import { createContext, useContext, useEffect } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+  COLOR_THEME_CLASSES,
+  LEGACY_COLOR_THEME_KEY,
+  STORAGE_KEYS,
+  type ColorTheme,
+} from "@/features/settings/config";
+import { getInitialColorTheme, isColorTheme } from "@/features/settings/utils";
 
 interface ThemeContextType {
   colorTheme: ColorTheme;
@@ -19,29 +18,21 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [colorTheme, setColorTheme] = useState<ColorTheme>(() => {
-    if (typeof window === "undefined") {
-      return "blue";
-    }
-
-    const stored = window.localStorage.getItem("colorTheme");
-    if (
-      stored === "blue" ||
-      stored === "green" ||
-      stored === "purple" ||
-      stored === "high-contrast"
-    ) {
-      return stored;
-    }
-
-    return "blue";
-  });
+  const [colorTheme, setColorTheme] = useLocalStorage<ColorTheme>(
+    STORAGE_KEYS.colorTheme,
+    getInitialColorTheme(),
+    isColorTheme
+  );
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove(...Object.values(COLOR_THEME_CLASSES));
     root.classList.add(COLOR_THEME_CLASSES[colorTheme]);
-    localStorage.setItem("colorTheme", colorTheme);
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.colorTheme, JSON.stringify(colorTheme));
+      localStorage.removeItem(LEGACY_COLOR_THEME_KEY);
+    } catch {}
   }, [colorTheme]);
 
   return (

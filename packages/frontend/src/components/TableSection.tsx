@@ -1,16 +1,10 @@
 "use client";
 
-import type { PetrolStation } from "@/types";
 import { StationTableRow } from "@/components/StationTableRow";
+import type { StationWithCosts } from "@/features/stations/types";
 
 interface TableSectionProps {
-  stations: (PetrolStation & {
-    distance: number;
-    price: number;
-    costToTravel: number | undefined;
-    costOfFillUp: number | undefined;
-    totalCost: number | undefined;
-  })[];
+  stations: StationWithCosts[];
   radiusMiles: number;
   isLoading: boolean;
   error: string | null;

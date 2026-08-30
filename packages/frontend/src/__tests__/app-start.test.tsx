@@ -19,7 +19,7 @@
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { ThemeProvider } from "@/app/providers";
+import { STORAGE_KEYS } from "@/features/settings/config";
 import { STORAGE_VERSION, STORAGE_VERSION_KEY } from "@/lib/storageVersion";
 
 // ---------------------------------------------------------------------------
@@ -42,14 +42,6 @@ vi.mock("@/lib/geolocation", () => ({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-const STORAGE_KEYS = {
-  fuelType: "pricepermile_fuelType",
-  radiusMiles: "pricepermile_radiusMiles",
-  milesPerGallon: "pricepermile_milesPerGallon",
-  fillUpLitres: "pricepermile_fillUpLitres",
-  onboardingComplete: "pricepermile_onboardingComplete",
-};
 
 /** Populate localStorage to simulate a returning user with the current schema. */
 function setValidReturningUserStorage() {
@@ -75,6 +67,7 @@ function setStaleReturningUserStorage() {
 beforeEach(() => {
   // Stub fetch to return an empty station list so the component doesn't throw
   global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve([]),
   } as unknown as Response);
 });
@@ -96,6 +89,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 async function renderHome() {
+  const { ThemeProvider } = await import("@/app/providers");
   const { default: Home } = await import("@/app/page");
   render(
     <ThemeProvider>
@@ -210,4 +204,3 @@ describe("App start-up journeys", () => {
     });
   });
 });
-

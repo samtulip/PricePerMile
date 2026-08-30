@@ -1,17 +1,11 @@
 "use client";
 
-import type { PetrolStation } from "@/types";
 import { formatPounds } from "@/utils/formatters";
 import { MapPin } from "lucide-react";
+import type { StationWithCosts } from "@/features/stations/types";
 
 interface StationTableRowProps {
-  station: PetrolStation & {
-    distance: number;
-    price: number;
-    costToTravel: number | undefined;
-    costOfFillUp: number | undefined;
-    totalCost: number | undefined;
-  };
+  station: StationWithCosts;
   referenceStationCost: number | undefined;
   isSelected: boolean;
   onSelect: () => void;

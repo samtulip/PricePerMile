@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { FuelTypeSelector } from "@/features/settings/components/FuelTypeSelector";
+import { parsePositiveNumber } from "@/features/settings/utils";
 import type { FuelType } from "@/types";
 
 interface OnboardingWizardProps {
@@ -122,22 +124,7 @@ export function OnboardingWizard({
         <div className="mt-5 space-y-4">
           <fieldset>
             <legend className="block text-sm font-medium mb-2">Fuel type</legend>
-            <div className="flex gap-3">
-              {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
-                <button
-                  type="button"
-                  key={fuel}
-                  onClick={() => setFuelType(fuel)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
-                    fuelType === fuel
-                      ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                      : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                  }`}
-                >
-                  {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
-                </button>
-              ))}
-            </div>
+            <FuelTypeSelector selectedFuel={fuelType} onChange={setFuelType} />
           </fieldset>
 
           <div>
@@ -150,7 +137,9 @@ export function OnboardingWizard({
               min={1}
               step={1}
               value={milesPerGallon}
-              onChange={(event) => setMilesPerGallon(Math.max(1, Number(event.target.value) || 1))}
+              onChange={(event) =>
+                setMilesPerGallon(parsePositiveNumber(event.target.value, milesPerGallon))
+              }
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
             />
           </div>
@@ -165,7 +154,9 @@ export function OnboardingWizard({
               min={1}
               step={1}
               value={fillUpLitres}
-              onChange={(event) => setFillUpLitres(Math.max(1, Number(event.target.value) || 1))}
+              onChange={(event) =>
+                setFillUpLitres(parsePositiveNumber(event.target.value, fillUpLitres))
+              }
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
             />
           </div>
@@ -180,7 +171,9 @@ export function OnboardingWizard({
               min={1}
               step={1}
               value={radiusMiles}
-              onChange={(event) => setRadiusMiles(Math.max(1, Number(event.target.value) || 1))}
+              onChange={(event) =>
+                setRadiusMiles(parsePositiveNumber(event.target.value, radiusMiles))
+              }
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
             />
           </div>

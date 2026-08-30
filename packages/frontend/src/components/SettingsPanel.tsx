@@ -1,7 +1,16 @@
 "use client";
 
-import type { FuelType } from "@/types";
 import { useTheme } from "@/app/providers";
+import { FuelTypeSelector } from "@/features/settings/components/FuelTypeSelector";
+import {
+  COLOR_THEMES,
+  COLOR_THEME_LABELS,
+  DEFAULT_FILL_UP_LITRES,
+  DEFAULT_MPG,
+  type ColorTheme,
+} from "@/features/settings/config";
+import { parsePositiveNumber } from "@/features/settings/utils";
+import type { FuelType } from "@/types";
 
 interface SettingsPanelProps {
   selectedFuel: FuelType;
@@ -16,9 +25,6 @@ interface SettingsPanelProps {
   defaultFillUp: number;
   onOpenWizard: () => void;
 }
-
-const DEFAULT_MPG = 45;
-const DEFAULT_FILL_UP_LITRES = 40;
 
 export function SettingsPanel({
   selectedFuel,
@@ -35,41 +41,12 @@ export function SettingsPanel({
 }: SettingsPanelProps) {
   const { colorTheme, setColorTheme } = useTheme();
 
-  const handleMpgNumber = (value: string) => {
-    const parsedValue = Number(value);
-    if (!Number.isNaN(parsedValue) && parsedValue > 0) {
-      onMpgChange(parsedValue);
-    }
-  };
-
-  const handleFillUpNumber = (value: string) => {
-    const parsedValue = Number(value);
-    if (!Number.isNaN(parsedValue) && parsedValue > 0) {
-      onFillUpChange(parsedValue);
-    }
-  };
-
   return (
     <div className="bg-white p-3 sm:rounded-lg sm:border sm:border-slate-200 sm:p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div>
           <label className="block text-sm font-medium mb-2">Fuel type</label>
-          <div className="flex gap-3">
-            {(["petrol", "diesel"] as FuelType[]).map((fuel) => (
-              <button
-                type="button"
-                key={fuel}
-                onClick={() => onFuelChange(fuel)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors w-full ${
-                  selectedFuel === fuel
-                    ? "bg-[var(--accent-600)] text-[var(--accent-on)]"
-                    : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                }`}
-              >
-                {fuel.charAt(0).toUpperCase() + fuel.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FuelTypeSelector selectedFuel={selectedFuel} onChange={onFuelChange} />
         </div>
         <div>
           <span className="block text-sm font-medium mb-2">Miles per gallon</span>
@@ -88,7 +65,7 @@ export function SettingsPanel({
             min={1}
             step={1}
             value={milesPerGallon}
-            onChange={(event) => handleMpgNumber(event.target.value)}
+            onChange={(event) => onMpgChange(parsePositiveNumber(event.target.value, milesPerGallon))}
             className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
             aria-label="Miles per gallon number input"
           />
@@ -113,7 +90,9 @@ export function SettingsPanel({
             min={1}
             step={1}
             value={fillUpLitres}
-            onChange={(event) => handleFillUpNumber(event.target.value)}
+            onChange={(event) =>
+              onFillUpChange(parsePositiveNumber(event.target.value, fillUpLitres))
+            }
             className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
             aria-label="Fill-up amount number input"
           />
@@ -145,15 +124,16 @@ export function SettingsPanel({
             id="color-theme"
             value={colorTheme}
             onChange={(event) =>
-              setColorTheme(event.target.value as "blue" | "green" | "purple" | "high-contrast")
+              setColorTheme(event.target.value as ColorTheme)
             }
             className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 appearance-none"
             aria-label="Select color theme"
           >
-            <option value="blue">Blue</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-            <option value="high-contrast">High Contrast</option>
+            {COLOR_THEMES.map((themeOption) => (
+              <option key={themeOption} value={themeOption}>
+                {COLOR_THEME_LABELS[themeOption]}
+              </option>
+            ))}
           </select>
         </div>
         <button

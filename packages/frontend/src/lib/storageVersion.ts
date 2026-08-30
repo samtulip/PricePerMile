@@ -1,20 +1,12 @@
-/**
- * Storage version management for localStorage schema migrations.
- *
- * When the shape or meaning of any persisted key changes, increment
- * STORAGE_VERSION so that returning users with stale data are
- * automatically reinitialized to defaults instead of experiencing
- * broken behaviour.
- *
- * Version history:
- *   1 – initial versioned schema
- */
+import {
+  APP_STORAGE_PREFIX,
+  LEGACY_STORAGE_KEYS,
+  STORAGE_KEYS,
+  STORAGE_VERSION,
+} from "@/features/settings/config";
 
-export const STORAGE_VERSION = 1;
-export const STORAGE_VERSION_KEY = "pricepermile_storage_version";
-
-/** Prefix shared by all persisted app keys (excluding the version key itself). */
-const APP_KEY_PREFIX = "pricepermile_";
+export { STORAGE_VERSION };
+export const STORAGE_VERSION_KEY = STORAGE_KEYS.schemaVersion;
 
 /**
  * Checks the stored schema version against the current one.
@@ -32,37 +24,36 @@ export function initializeStorage(): boolean {
     return false;
   }
 
-  const stored = localStorage.getItem(STORAGE_VERSION_KEY);
+  try {
+    const stored = localStorage.getItem(STORAGE_VERSION_KEY);
 
-  // Version already matches – nothing to do.
-  if (stored === String(STORAGE_VERSION)) {
-    return false;
-  }
-
-  // Collect all app data keys (excluding the version key itself, which is
-  // managed separately below).
-  const dataKeysToRemove: string[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (
-      key !== null &&
-      key.startsWith(APP_KEY_PREFIX) &&
-      key !== STORAGE_VERSION_KEY
-    ) {
-      dataKeysToRemove.push(key);
+    const keysToRemove = new Set<string>();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key !== null && key.startsWith(APP_STORAGE_PREFIX) && key !== STORAGE_VERSION_KEY) {
+        keysToRemove.add(key);
+      }
     }
-  }
 
-  // New user with no prior app data at all – just stamp the version and
-  // return false (no stale data was cleared).
-  if (dataKeysToRemove.length === 0) {
+    LEGACY_STORAGE_KEYS.forEach((key) => {
+      if (localStorage.getItem(key) !== null) {
+        keysToRemove.add(key);
+      }
+    });
+
+    if (stored === String(STORAGE_VERSION) && keysToRemove.size === 0) {
+      return false;
+    }
+
+    if (keysToRemove.size === 0) {
+      localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
+      return false;
+    }
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
     localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
+    return true;
+  } catch {
     return false;
   }
-
-  // Stale data exists (wrong version or legacy data without a version key):
-  // clear it, write the new version, and signal that reinitialisation occurred.
-  dataKeysToRemove.forEach((key) => localStorage.removeItem(key));
-  localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
-  return true;
 }

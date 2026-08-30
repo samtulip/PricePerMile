@@ -2,61 +2,30 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
-import { TableSection } from "@/components/TableSection";
 import { MapSection } from "@/components/MapSection";
-import { SettingsPanel } from "@/components/SettingsPanel";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { TableSection } from "@/components/TableSection";
+import {
+  DEFAULT_FILL_UP_LITRES,
+  DEFAULT_FUEL,
+  DEFAULT_MPG,
+  DEFAULT_RADIUS,
+  STORAGE_KEYS,
+} from "@/features/settings/config";
+import { isBoolean, isFuelType, isPositiveNumber } from "@/features/settings/utils";
+import { TABLE_PAGE_SIZE } from "@/features/stations/config";
+import { fetchStations } from "@/features/stations/lib/stationData";
+import {
+  getPaginationWindow,
+  getReferenceStationCost,
+  getTopRankedStations,
+  rankStations,
+} from "@/features/stations/lib/stationRanking";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useStorageVersion } from "@/hooks/useStorageVersion";
-import { getUserLocation, calculateDistance, calculateCostToTravel } from "@/lib/geolocation";
-import type { FuelType, PetrolStation, UserLocation, RankedStation } from "@/types";
-
-const DEFAULT_FUEL: FuelType = "petrol";
-const DEFAULT_RADIUS = 7;
-const DEFAULT_MPG = 45;
-const DEFAULT_FILL_UP_LITRES = 40;
-const TABLE_PAGE_SIZE = 10;
-const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
-
-// Increment this whenever the shape or meaning of any stored keys changes.
-// On mismatch all pricepermile_* keys are cleared so the wizard re-runs
-// with clean defaults, preventing unresponsive state from dirty storage.
-const STORAGE_SCHEMA_VERSION = "1";
-
-const STORAGE_KEYS = {
-  schemaVersion: "pricepermile_schemaVersion",
-  fuelType: "pricepermile_fuelType",
-  radiusMiles: "pricepermile_radiusMiles",
-  milesPerGallon: "pricepermile_milesPerGallon",
-  fillUpLitres: "pricepermile_fillUpLitres",
-  selectedStationId: "pricepermile_selectedStationId",
-  onboardingComplete: "pricepermile_onboardingComplete",
-};
-
-// Run synchronously at module-load time (client only) so that all
-// useLocalStorage initialisers see clean storage when the schema changes.
-if (typeof window !== "undefined") {
-  try {
-    const storedVersion = localStorage.getItem(STORAGE_KEYS.schemaVersion);
-    if (storedVersion !== STORAGE_SCHEMA_VERSION) {
-      const keysToRemove = Object.keys(localStorage).filter((key) =>
-        key.startsWith("pricepermile_")
-      );
-      keysToRemove.forEach((key) => localStorage.removeItem(key));
-      localStorage.setItem(STORAGE_KEYS.schemaVersion, STORAGE_SCHEMA_VERSION);
-    }
-  } catch {
-    // localStorage unavailable (e.g. private browsing with strict settings) — ignore
-  }
-}
-
-type StationWithCosts = PetrolStation & {
-  distance: number;
-  price: number;
-  costToTravel: number | undefined;
-  costOfFillUp: number | undefined;
-  totalCost: number | undefined;
-};
+import { getUserLocation } from "@/lib/geolocation";
+import type { FuelType, PetrolStation, UserLocation } from "@/types";
 
 export default function Home() {
   // Run version check first so useLocalStorage reads see clean state on migration
@@ -66,22 +35,22 @@ export default function Home() {
   const [selectedFuel, setSelectedFuel] = useLocalStorage<FuelType>(
     STORAGE_KEYS.fuelType,
     DEFAULT_FUEL,
-    (value) => value === "petrol" || value === "diesel"
+    isFuelType
   );
   const [radiusMiles, setRadiusMiles] = useLocalStorage<number>(
     STORAGE_KEYS.radiusMiles,
     DEFAULT_RADIUS,
-    (value) => typeof value === "number" && value > 0
+    isPositiveNumber
   );
   const [milesPerGallon, setMilesPerGallon] = useLocalStorage<number>(
     STORAGE_KEYS.milesPerGallon,
     DEFAULT_MPG,
-    (value) => typeof value === "number" && value > 0
+    isPositiveNumber
   );
   const [fillUpLitres, setFillUpLitres] = useLocalStorage<number>(
     STORAGE_KEYS.fillUpLitres,
     DEFAULT_FILL_UP_LITRES,
-    (value) => typeof value === "number" && value > 0
+    isPositiveNumber
   );
   const [selectedStationId, setSelectedStationId] = useLocalStorage<string | null>(
     STORAGE_KEYS.selectedStationId,
@@ -90,7 +59,7 @@ export default function Home() {
   const [onboardingComplete, setOnboardingComplete] = useLocalStorage<boolean>(
     STORAGE_KEYS.onboardingComplete,
     false,
-    (value) => typeof value === "boolean"
+    isBoolean
   );
   // UI state
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
@@ -100,7 +69,8 @@ export default function Home() {
   // Data state
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [stations, setStations] = useState<PetrolStation[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [stationsError, setStationsError] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isLoadingStations, setIsLoadingStations] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,10 +82,10 @@ export default function Home() {
     getUserLocation()
       .then((location) => {
         setUserLocation(location);
-        setError(null);
+        setLocationError(null);
       })
       .catch(() => {
-        setError(
+        setLocationError(
           "Unable to access geolocation. Allow location access or set your browser permissions to use nearby station search."
         );
       })
@@ -126,14 +96,13 @@ export default function Home() {
 
   // Load station data
   useEffect(() => {
-    fetch(`${BASE_PATH}/data/stations.json`)
-      .then((response) => response.json())
+    fetchStations()
       .then((data: PetrolStation[]) => {
         setStations(data);
-        setError(null);
+        setStationsError(null);
       })
       .catch(() => {
-        setError("Unable to load station data. Please try again later.");
+        setStationsError("Unable to load station data. Please try again later.");
       })
       .finally(() => {
         setIsLoadingStations(false);
@@ -142,84 +111,27 @@ export default function Home() {
 
   // Calculate nearby stations with costs
   const nearbyStations = useMemo(() => {
-    if (!userLocation || stations.length === 0) return [];
-
-    return stations
-      .map((station) => {
-        const distance = calculateDistance(
-          userLocation.latitude,
-          userLocation.longitude,
-          station.latitude,
-          station.longitude
-        );
-
-        const fuelPrice = station.prices.find((price) => price.type === selectedFuel);
-
-        return {
-          ...station,
-          distance,
-          price: fuelPrice?.price,
-          costToTravel: fuelPrice
-            ? calculateCostToTravel(distance, milesPerGallon, fuelPrice.price)
-            : undefined,
-          costOfFillUp: fuelPrice ? Math.round(fillUpLitres * fuelPrice.price) : undefined,
-        };
-      })
-      .map((station) => ({
-        ...station,
-        totalCost:
-          station.costToTravel !== undefined && station.costOfFillUp !== undefined
-            ? station.costToTravel + station.costOfFillUp
-            : undefined,
-      }))
-      .filter(
-        (station): station is StationWithCosts =>
-          station.price !== undefined && station.distance !== undefined
-      )
-      .filter((station) => station.distance <= radiusMiles)
-      .sort((a, b) => {
-        if (a.totalCost !== undefined && b.totalCost !== undefined) {
-          if (a.totalCost === b.totalCost) return a.distance - b.distance;
-          return a.totalCost - b.totalCost;
-        }
-        if (a.totalCost !== undefined) return -1;
-        if (b.totalCost !== undefined) return 1;
-        if (a.price === b.price) return a.distance - b.distance;
-        return a.price - b.price;
-      });
+    return rankStations({
+      stations,
+      userLocation,
+      selectedFuel,
+      radiusMiles,
+      milesPerGallon,
+      fillUpLitres,
+    });
   }, [stations, selectedFuel, userLocation, radiusMiles, milesPerGallon, fillUpLitres]);
 
   // Get top stations for map
-  const topStationsForMap = useMemo(
-    () =>
-      nearbyStations
-        .filter(
-          (station): station is RankedStation =>
-            station.totalCost !== undefined &&
-            station.costOfFillUp !== undefined &&
-            station.costToTravel !== undefined
-        )
-        .slice(0, 5),
-    [nearbyStations]
+  const topStationsForMap = useMemo(() => getTopRankedStations(nearbyStations), [nearbyStations]);
+  const { currentPage: safeCurrentPage, totalPages } = useMemo(
+    () => getPaginationWindow(nearbyStations.length, currentPage, TABLE_PAGE_SIZE),
+    [nearbyStations.length, currentPage]
   );
-
-  // Calculate pagination
-  const totalPages = Math.max(1, Math.ceil(nearbyStations.length / TABLE_PAGE_SIZE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-
-  // Get best total cost for reference
-  const bestTotalCost = nearbyStations.reduce<number | undefined>((best, station) => {
-    if (station.totalCost === undefined) return best;
-    if (best === undefined || station.totalCost < best) return station.totalCost;
-    return best;
-  }, undefined);
-
-  // Get selected station
-  const selectedStation = selectedStationId
-    ? nearbyStations.find((station) => station.id === selectedStationId)
-    : undefined;
-
-  const referenceStationCost = selectedStation?.totalCost ?? bestTotalCost;
+  const referenceStationCost = useMemo(
+    () => getReferenceStationCost(nearbyStations, selectedStationId),
+    [nearbyStations, selectedStationId]
+  );
+  const error = stationsError ?? locationError;
 
   return (
     <>
